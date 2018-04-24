@@ -23,6 +23,10 @@ Plug 'dkprice/vim-easygrep'
 Plug 'airblade/vim-gitgutter'
 Plug 'w0rp/ale'
 " Plug 'vim-syntastic/syntastic', {'dir': '~/source/syntastic'}
+Plug 'altercation/vim-colors-solarized'
+Plug 'Rip-Rip/clang_complete'
+Plug 'jremmen/vim-ripgrep'
+Plug 'vimwiki/vimwiki'
 
 call plug#end()
 
@@ -90,5 +94,13 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 " --follow: Follow symlinks
 " --glob: Additional conditions for search (in this case ignore everything in the .git/ folder)
 " --color: Search color options
-command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
+command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!cscope*" --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
 set grepprg=rg\ --vimgrep
+
+" path to directory where library can be found
+let g:clang_library_path='/usr/lib/llvm-3.8/lib'
+
+set tabstop=4
+set softtabstop=0 noexpandtab
+set shiftwidth=4
+set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab

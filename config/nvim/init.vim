@@ -1,13 +1,13 @@
 call plug#begin('~/.vim/plugged')
 
 Plug 'fatih/vim-go', {'tag': '*'}
-Plug 'nsf/gocode', {'tag': 'v.20150303', 'rtp': 'vim'}
+" Plug 'nsf/gocode', {'tag': 'v.20150303', 'rtp': 'vim'}
 Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install -all'}
 Plug 'junegunn/fzf.vim'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'Shougo/vimproc.vim', {'do': 'make'}
 Plug 'NLKNguyen/c-syntax.vim'
-Plug 'Valloric/YouCompleteMe', {'do': './install.py'}
+" Plug 'Valloric/YouCompleteMe', {'do': './install.py'}
 Plug 'itchyny/lightline.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'jeetsukumaran/vim-buffergator'
@@ -15,7 +15,7 @@ Plug 'Raimondi/delimitMate'
 Plug 'christoomey/vim-tmux-navigator'
 " Plug 'mileszs/ack.vim'
 Plug 'chazy/cscope_maps'
-Plug 'rdnetto/YCM-Generator', {'branch': 'stable'}
+" Plug 'rdnetto/YCM-Generator', {'branch': 'stable'}
 Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle'}
 Plug 'benmills/vimux'
 Plug 'majutsushi/tagbar'
@@ -24,7 +24,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'w0rp/ale'
 " Plug 'vim-syntastic/syntastic', {'dir': '~/source/syntastic'}
 Plug 'altercation/vim-colors-solarized'
-Plug 'Rip-Rip/clang_complete'
+" Plug 'Rip-Rip/clang_complete'
 Plug 'jremmen/vim-ripgrep'
 Plug 'vimwiki/vimwiki'
 

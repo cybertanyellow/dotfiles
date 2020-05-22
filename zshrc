@@ -7,7 +7,8 @@
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="example"
+#ZSH_THEME="example"
+#ZSH_THEME="minimal"
 #ZSH_THEME="refined"
 
 # Uncomment the following line to use case-sensitive completion.
@@ -52,7 +53,7 @@ ZSH_THEME="example"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git server fzf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -91,3 +92,6 @@ PERL_LOCAL_LIB_ROOT="/home/yellow/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_
 PERL_MB_OPT="--install_base \"/home/yellow/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/home/yellow/perl5"; export PERL_MM_OPT;
 
+
+source /home/yellow/.config/broot/launcher/bash/br
+eval "$(starship init zsh)"

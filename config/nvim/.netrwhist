@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/home/yellow/project-imx8/NXP/imx-5.4.24-2.2.0/sources/poky/meta'
+let g:netrw_dirhist_0='/home/yellow/project-imx8/project_rs1100_tbox/imx-yocto-bsp/sources/poky'
+let g:netrw_dirhist_9='/home/yellow/project-imx8/NXP/imx-5.4.24-2.2.0/sources/meta-quectel-cv2x-bin/conf'
+let g:netrw_dirhist_8='/home/yellow/project-imx8/project_rs1100_tbox/imx-yocto-bsp/sources/meta-quectel-cv2x-bin/recipes-qti-eap/telematics-conf'
+let g:netrw_dirhist_7='/home/yellow/project-imx8/project_rs1100_tbox/imx-yocto-bsp/sources/meta-arcadyan'
+let g:netrw_dirhist_6='/home/yellow/project-imx8/cypress-fmac-v5.4.18-2020_0925/cypress-backports-v5.4.18-2020_0925-module-src/v5.4.18-backports'
+let g:netrw_dirhist_5='/home/yellow/project-imx8/cypress-fmac-v5.4.18-2020_0925/cypress-backports-v5.4.18-2020_0925-module-src'
+let g:netrw_dirhist_4='/home/yellow/project-imx8/project_rs1100_tbox/imx-yocto-bsp/sources/meta-cypress/recipes-connectivity'
+let g:netrw_dirhist_3='/home/yellow/project-imx8/project_rs1100_tbox/imx-yocto-bsp/build_bringup/tmp/work/aarch64-poky-linux/hostapd/2.9-r0'
+let g:netrw_dirhist_2='/home/yellow/project-imx8/nxp_official_imx8_4.14.98_2.3.0/build_imx6/tmp/work-shared/imx6sxsabresd/kernel-source'

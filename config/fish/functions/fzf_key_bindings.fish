@@ -1,0 +1,1 @@
+/home/yellow/.vim/plugged/fzf/shell/key-bindings.fish

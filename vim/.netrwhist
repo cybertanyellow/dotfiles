@@ -1,0 +1,3 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/home/yellow/imx-docker/imx-5.10.52-2.1.0'

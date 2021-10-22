@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/home/yellow/project-imx8/aut102221/sources/poky'
+let g:netrw_dirhist_0='/home/yellow/project-imx8/aut102221/sources/meta-arcadyan/recipes-apps/gnss-daemon'
+let g:netrw_dirhist_9='/home/yellow/project-imx8/aut102221/sources/meta-rauc/recipes-arc/rauc'
+let g:netrw_dirhist_8='/home/yellow/project-imx8/aut102221/sources/meta-arcadyan/recipes-core/factory-reset/files/post.d'
+let g:netrw_dirhist_7='/home/yellow/project-imx8/aut102221/sources/meta-arcadyan/classes'
+let g:netrw_dirhist_6='/home/yellow/project-imx8/tbox_imx8dxp.git/arc_mirror/linux-imx'
+let g:netrw_dirhist_5='/home/yellow/project-imx8/aut102221/sources/meta-rauc/recipes-arc/rauc/files'
+let g:netrw_dirhist_4='/home/yellow/project-imx8/aut102221/imx-yocto-bsp/sources'
+let g:netrw_dirhist_3='/home/yellow/project-imx8/tbox_imx8dxp.git/build_imx8dxptbox/tmp/work/imx8dxptbox-poky-linux/tbox-cortexm4/2.9.0-r0/git/elua/src'
+let g:netrw_dirhist_2='/home/yellow/project-imx8/tbox_imx8dxp.git/build_imx8dxptbox/tmp/work/imx8dxptbox-poky-linux/tbox-cortexm4/2.9.0-r0/git/components/common_task'

@@ -68,12 +68,18 @@ CTRL-A		Insert previously inserted text.
 CTRL-W		Delete the word before the cursor (see |i_backspacing| about
 		joining lines).  See the section "word motions",
 		|word-motions|, for the definition of a word.
+						*i_CTRL-W-default*
+		By default, sets a new undo point before deleting.
+		|default-mappings|
 						*i_CTRL-U*
 CTRL-U		Delete all entered characters before the cursor in the current
 		line.  If there are no newly entered characters and
 		'backspace' is not empty, delete all characters before the
 		cursor in the current line.
 		See |i_backspacing| about joining lines.
+						*i_CTRL-U-default*
+		By default, sets a new undo point before deleting.
+		|default-mappings|
 						*i_CTRL-I* *i_<Tab>* *i_Tab*
 <Tab> or CTRL-I Insert a tab.  If the 'expandtab' option is on, the
 		equivalent number of spaces is inserted (use CTRL-V <Tab> to
@@ -95,7 +101,7 @@ CTRL-K {char1} [char2]
 CTRL-N		Find next keyword (see |i_CTRL-N|).
 CTRL-P		Find previous keyword (see |i_CTRL-P|).
 
-CTRL-R {0-9a-z"%#*+:.-=}					*i_CTRL-R*
+CTRL-R {register}				*i_CTRL-R*
 		Insert the contents of a register.  Between typing CTRL-R and
 		the second character, '"' will be displayed to indicate that
 		you are expected to enter the name of a register.
@@ -132,7 +138,7 @@ CTRL-R {0-9a-z"%#*+:.-=}					*i_CTRL-R*
 				sequence will be broken.
 		See |registers| about registers.
 
-CTRL-R CTRL-R {0-9a-z"%#*+/:.-=}			*i_CTRL-R_CTRL-R*
+CTRL-R CTRL-R {register}			*i_CTRL-R_CTRL-R*
 		Insert the contents of a register.  Works like using a single
 		CTRL-R, but the text is inserted literally, not as if typed.
 		This differs when the register contains characters like <BS>.
@@ -143,8 +149,10 @@ CTRL-R CTRL-R {0-9a-z"%#*+/:.-=}			*i_CTRL-R_CTRL-R*
 		you also want to avoid these, use CTRL-R CTRL-O, see below.
 		The '.' register (last inserted text) is still inserted as
 		typed.
+		After this command, the '.' register contains the text from
+		the register as if it was inserted by typing it.
 
-CTRL-R CTRL-O {0-9a-z"%#*+/:.-=}			*i_CTRL-R_CTRL-O*
+CTRL-R CTRL-O {register}			*i_CTRL-R_CTRL-O*
 		Insert the contents of a register literally and don't
 		auto-indent.  Does the same as pasting with the mouse
 		|<MiddleMouse>|. When the register is linewise this will
@@ -152,13 +160,19 @@ CTRL-R CTRL-O {0-9a-z"%#*+/:.-=}			*i_CTRL-R_CTRL-O*
 		Does not replace characters!
 		The '.' register (last inserted text) is still inserted as
 		typed.
+		After this command, the '.' register contains the command
+		typed and not the text. I.e., the literals "^R^O" and not the
+		text from the register.
 
-CTRL-R CTRL-P {0-9a-z"%#*+/:.-=}			*i_CTRL-R_CTRL-P*
+CTRL-R CTRL-P {register}			*i_CTRL-R_CTRL-P*
 		Insert the contents of a register literally and fix the
 		indent, like |[<MiddleMouse>|.
 		Does not replace characters!
 		The '.' register (last inserted text) is still inserted as
 		typed.
+		After this command, the '.' register contains the command
+		typed and not the text. I.e., the literals "^R^P" and not the
+		text from the register.
 
 						*i_CTRL-T*
 CTRL-T		Insert one shiftwidth of indent at the start of the current
@@ -284,6 +298,7 @@ If you enter a value of 10, it will end up in the file as a 0.  The 10 is a
 the buffer to a file, the <NL> character is translated into <Nul>.  The <NL>
 character is written at the end of each line.  Thus if you want to insert a
 <NL> character in a file you will have to make a line break.
+Also see 'fileformat'.
 
 						*i_CTRL-X* *insert_expand*
 CTRL-X enters a sub-mode where several commands can be used.  Most of these
@@ -358,7 +373,7 @@ CTRL-\ CTRL-O	like CTRL-O but don't move the cursor	     *i_CTRL-\_CTRL-O*
 CTRL-L		when 'insertmode' is set: go to Normal mode  *i_CTRL-L*
 CTRL-G u	break undo sequence, start new change	     *i_CTRL-G_u*
 CTRL-G U	don't break undo with next left/right cursor *i_CTRL-G_U*
-		movement, if the cursor stays within
+		movement, if the cursor stays within the
 		same the line
 -----------------------------------------------------------------------
 
@@ -606,6 +621,8 @@ Completion can be done for:
 11. omni completion					|i_CTRL-X_CTRL-O|
 12. Spelling suggestions				|i_CTRL-X_s|
 13. keywords in 'complete'				|i_CTRL-N| |i_CTRL-P|
+
+Additionally, |i_CTRL-X_CTRL-Z| stops completion without changing the text.
 
 All these, except CTRL-N and CTRL-P, are done in CTRL-X mode.  This is a
 sub-mode of Insert and Replace modes.  You enter CTRL-X mode by typing CTRL-X
@@ -1007,6 +1024,12 @@ CTRL-P			Find previous match for words that start with the
 			other contexts unless a double CTRL-X is used.
 
 
+Stop completion						*compl-stop*
+
+							*i_CTRL-X_CTRL-Z*
+CTRL-X CTRL-Z		Stop completion without changing the text.
+
+
 FUNCTIONS FOR FINDING COMPLETIONS			*complete-functions*
 
 This applies to 'completefunc' and 'omnifunc'.
@@ -1038,7 +1061,8 @@ On the second invocation the arguments are:
 
 The function must return a List with the matching words.  These matches
 usually include the "a:base" text.  When there are no matches return an empty
-List.
+List.  Note that the cursor may have moved since the first invocation, the
+text may have been changed.
 
 In order to return more information than the matching words, return a Dict
 that contains the List.  The Dict can have these items:
@@ -1109,7 +1133,7 @@ match to the total list.  These matches should then not appear in the returned
 list!  Call |complete_check()| now and then to allow the user to press a key
 while still searching for matches.  Stop searching when it returns non-zero.
 
-							*E839* *E840*
+							*E840*
 The function is allowed to move the cursor, it is restored afterwards.
 The function is not allowed to move to another window or delete text.
 
@@ -1760,6 +1784,7 @@ a			Append text after the cursor [count] times.  If the
 
 							*A*
 A			Append text at the end of the line [count] times.
+			For using "A" in Visual block mode see |v_b_A|.
 
 <insert>	or				*i* *insert* *<Insert>*
 i			Insert text before the cursor [count] times.
@@ -1772,6 +1797,7 @@ I			Insert text before the first non-blank in the line
 			When the 'H' flag is present in 'cpoptions' and the
 			line only contains blanks, insert start just before
 			the last blank.
+			For using "I" in Visual block mode see |v_b_I|.
 
 							*gI*
 gI			Insert text in column 1 [count] times.
@@ -1937,11 +1963,11 @@ If the 'fileformats' option is not empty Vim tries to recognize the type of
 changed, the detected format is only used while reading the file.
 A similar thing happens with 'fileencodings'.
 
-On non-Windows systems the message "[dos format]" is shown if
-a file is read in DOS format, to remind you that something unusual is done.
-On Macintosh and Windows the message "[unix format]" is shown if
-a file is read in Unix format.
-On non-Macintosh systems, the message "[Mac format]" is shown if a file is
+On non-Win32 systems the message "[dos format]" is shown if a file is read in
+DOS format, to remind you that something unusual is done.
+On Macintosh and Win32 the message "[unix format]" is shown if a file is read
+in Unix format.
+On non-Macintosh systems, the message "[mac format]" is shown if a file is
 read in Mac format.
 
 An example on how to use ":r !": >

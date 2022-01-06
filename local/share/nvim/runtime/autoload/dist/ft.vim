@@ -1,7 +1,7 @@
 " Vim functions for file type detection
 "
 " Maintainer:	Bram Moolenaar <Bram@vim.org>
-" Last Change:	2019 Mar 08
+" Last Change:	2020 Aug 17
 
 " These functions are moved here from runtime/filetype.vim to make startup
 " faster.
@@ -172,6 +172,17 @@ func dist#ft#FTent()
   setf dtd
 endfunc
 
+func dist#ft#ExCheck()
+  let lines = getline(1, min([line("$"), 100]))
+  if exists('g:filetype_euphoria')
+    exe 'setf ' . g:filetype_euphoria
+  elseif match(lines, '^--\|^ifdef\>\|^include\>') > -1
+    setf euphoria3
+  else
+    setf elixir
+  endif
+endfunc
+
 func dist#ft#EuphoriaCheck()
   if exists('g:filetype_euphoria')
     exe 'setf ' . g:filetype_euphoria
@@ -253,6 +264,14 @@ func dist#ft#ProtoCheck(default)
 endfunc
 
 func dist#ft#FTm()
+  if exists("g:filetype_m")
+    exe "setf " . g:filetype_m
+    return
+  endif
+
+  " excluding end(for|function|if|switch|while) common to Murphi
+  let octave_block_terminators = '\<end\%(_try_catch\|classdef\|enumeration\|events\|methods\|parfor\|properties\)\>'
+
   let n = 1
   let saw_comment = 0 " Whether we've seen a multiline comment leader.
   while n < 100
@@ -267,6 +286,12 @@ func dist#ft#FTm()
       setf objc
       return
     endif
+    if line =~ '^\s*\%(#\|%!\)' || line =~ '^\s*unwind_protect\>' ||
+	  \ line =~ '\%(^\|;\)\s*' .. octave_block_terminators
+      setf octave
+      return
+    endif
+    " TODO: could be Matlab or Octave
     if line =~ '^\s*%'
       setf matlab
       return
@@ -287,18 +312,15 @@ func dist#ft#FTm()
     " or Murphi based on the comment leader. Assume the former as it is more
     " common.
     setf objc
-  elseif exists("g:filetype_m")
-    " Use user specified default filetype for .m
-    exe "setf " . g:filetype_m
   else
-    " Default is matlab
+    " Default is Matlab
     setf matlab
   endif
 endfunc
 
 func dist#ft#FTmms()
   let n = 1
-  while n < 10
+  while n < 20
     let line = getline(n)
     if line =~ '^\s*\(%\|//\)' || line =~ '^\*'
       setf mmix
@@ -325,7 +347,7 @@ endfunc
 
 func dist#ft#FTmm()
   let n = 1
-  while n < 10
+  while n < 20
     let line = getline(n)
     if line =~ '^\s*\(#\s*\(include\|import\)\>\|@import\>\|/\*\)'
       setf objcpp

@@ -1,0 +1,2 @@
+WARN  2021-03-16T11:10:01.095 3768715 deadly_signal:162: got signal 15 (SIGTERM)
+INFO  2021-03-16T11:10:01.120 3768715 os_exit:595: Nvim exit: 1

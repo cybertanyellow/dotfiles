@@ -35,6 +35,7 @@ Plug 'hrsh7th/vim-vsnip'
 " Optional
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
+" Plug 'mfussenegger/nvim-dap'
 Plug 'nvim-telescope/telescope.nvim'
 
 " Color scheme used in the GIFs!
@@ -62,7 +63,7 @@ set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
 
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = "all", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
   sync_install = false, -- install languages synchronously (only applied to `ensure_installed`)
   ignore_install = { "javascript" }, -- List of parsers to ignore installing
   highlight = {
@@ -98,11 +99,42 @@ local opts = {
     tools = { -- rust-tools options
         autoSetHints = true,
         hover_with_actions = true,
+        executor = require("rust-tools/executors").termopen,
+        on_initialized = nil,
         inlay_hints = {
             show_parameter_hints = false,
-            parameter_hints_prefix = "",
-            other_hints_prefix = "",
+            parameter_hints_prefix = "<- ",
+            other_hints_prefix = "=> ",
+
+            only_current_line = false,
+            only_current_line_autocmd = "CursorHold",
+            show_variable_name = false,
+            max_len_align = false,
+            max_len_align_padding = 1,
+            right_align = false,
+            right_align_padding = 7,
+            highlight = "Comment",
         },
+    },
+
+
+    -- options same as lsp hover / vim.lsp.util.open_floating_preview()
+    hover_actions = {
+        -- the border that is used for the hover window
+        -- see vim.api.nvim_open_win()
+        border = {
+                { "╭", "FloatBorder" },
+                { "─", "FloatBorder" },
+                { "╮", "FloatBorder" },
+                { "│", "FloatBorder" },
+                { "╯", "FloatBorder" },
+                { "─", "FloatBorder" },
+                { "╰", "FloatBorder" },
+                { "│", "FloatBorder" },
+            },
+        -- whether the hover action window gets automatically focused
+        -- default: false
+        auto_focus = false,
     },
 
     -- all the opts to send to nvim-lspconfig
@@ -111,16 +143,17 @@ local opts = {
     server = {
         -- on_attach is a callback called when the language server attachs to the buffer
         -- on_attach = on_attach,
-        settings = {
-            -- to enable rust-analyzer settings visit:
-            -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
-            ["rust-analyzer"] = {
-                -- enable clippy on save
-                checkOnSave = {
-                    command = "clippy"
-                },
-            }
-        }
+--        settings = {
+--            -- to enable rust-analyzer settings visit:
+--            -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
+--            ["rust-analyzer"] = {
+--                -- enable clippy on save
+--                checkOnSave = {
+--                    command = "clippy"
+--                },
+--            }
+--        }
+        standalone = true,
     },
 }
 
@@ -181,11 +214,11 @@ nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
 " 300ms of no cursor movement to trigger CursorHold
 set updatetime=300
 " Show diagnostic popup on cursor hold
-autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics()
+autocmd CursorHold * lua vim.diagnostic.open_float()
 
 " Goto previous/next diagnostic warning/error
-nnoremap <silent> g[ <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
-nnoremap <silent> g] <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
+nnoremap <silent> g[ <cmd>lua vim.diagnostic.goto_prev()<CR>
+nnoremap <silent> g] <cmd>lua vim.diagnostic.goto_next()<CR>
 
 " have a fixed column for the diagnostics to appear in
 " this removes the jitter when warnings/errors flow in

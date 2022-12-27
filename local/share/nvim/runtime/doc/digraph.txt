@@ -35,6 +35,9 @@ An alternative is using the 'keymap' option.
 <			Avoid defining a digraph with '_' (underscore) as the
 			first character, it has a special meaning in the
 			future.
+			NOTE: This command cannot add a digraph that starts
+			with a white space.  If you want to add such digraph,
+			you can use |digraph_set()| instead.
 
 Example of the output of ":digraphs": >
  TH Þ  222  ss ß  223  a! à  224  a' á  225  a> â  226  a? ã  227  a: ä  228
@@ -153,7 +156,7 @@ These are the RFC1345 digraphs for the one-byte characters.  See the output of
 ":digraphs" for the others.
 
 EURO
-
+							*euro* *euro-digraph*
 Exception: RFC1345 doesn't specify the euro sign.  In Vim the digraph =e was
 added for this.  Note the difference between latin1, where the digraph Cu is
 used for the currency sign, and latin9 (iso-8859-15), where the digraph =e is

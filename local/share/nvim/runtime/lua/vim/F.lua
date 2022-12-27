@@ -2,16 +2,24 @@ local F = {}
 
 --- Returns {a} if it is not nil, otherwise returns {b}.
 ---
----@param a
----@param b
+---@generic A
+---@generic B
+---
+---@param a A
+---@param b B
+---@return A | B
 function F.if_nil(a, b)
-  if a == nil then return b end
+  if a == nil then
+    return b
+  end
   return a
 end
 
 -- Use in combination with pcall
 function F.ok_or_nil(status, ...)
-  if not status then return end
+  if not status then
+    return
+  end
   return ...
 end
 
@@ -27,9 +35,9 @@ function F.nil_wrap(fn)
   end
 end
 
---- like {...} except preserve the lenght explicitly
+--- like {...} except preserve the length explicitly
 function F.pack_len(...)
-  return {n=select('#', ...), ...}
+  return { n = select('#', ...), ... }
 end
 
 --- like unpack() but use the length set by F.pack_len if present

@@ -44,25 +44,26 @@ functions like |chansend()| consume channel ids.
 2. Reading and writing raw bytes			      *channel-bytes*
 
 Channels opened by Vimscript functions operate with raw bytes by default. For
-a job channel using RPC, bytes can still be read over its stderr. Similarily,
+a job channel using RPC, bytes can still be read over its stderr. Similarly,
 only bytes can be written to Nvim's own stderr.
 
 						*channel-callback*
-on_stdout({chan-id}, {data}, {name})		*on_stdout* 
-on_stderr({chan-id}, {data}, {name})		*on_stderr* 
-on_stdin({chan-id}, {data}, {name})		*on_stdin* 
-on_data({chan-id}, {data}, {name})		*on_data*
+- on_stdout({chan-id}, {data}, {name})		*on_stdout*
+- on_stderr({chan-id}, {data}, {name})		*on_stderr*
+- on_stdin({chan-id}, {data}, {name})		*on_stdin*
+- on_data({chan-id}, {data}, {name})		*on_data*
+
     Scripts can react to channel activity (received data) via callback
     functions assigned to the `on_stdout`, `on_stderr`, `on_stdin`, or
     `on_data` option keys. Callbacks should be fast: avoid potentially
     slow/expensive work.
 
     Parameters: ~
-      {chan-id}     Channel handle. |channel-id|
-      {data}	    Raw data (|readfile()|-style list of strings) read from
+      - {chan-id}   Channel handle. |channel-id|
+      - {data}	    Raw data (|readfile()|-style list of strings) read from
 		    the channel. EOF is a single-item list: `['']`. First and
 		    last items may be partial lines! |channel-lines|
-      {name}	    Stream name (string) like "stdout", so the same function
+      - {name}	    Stream name (string) like "stdout", so the same function
 		    can handle multiple streams. Event names depend on how the
 		    channel was opened and in what mode/protocol.
 
@@ -83,13 +84,14 @@ on_data({chan-id}, {data}, {name})		*on_data*
     the final `['']` emitted at EOF):
       - `foobar` may arrive as `['fo'], ['obar']` 
       - `foo\nbar` may arrive as
-	   `['foo','bar']`
-	or `['foo',''], ['bar']`
-	or `['foo'], ['','bar']`
-	or `['fo'], ['o','bar']`
+	- `['foo','bar']`
+	- or `['foo',''], ['bar']`
+	- or `['foo'], ['','bar']`
+	- or `['fo'], ['o','bar']`
+
     There are two ways to deal with this:
-    1. To wait for the entire output, use |channel-buffered| mode.
-    2. To read line-by-line, use the following code: >
+    - 1. To wait for the entire output, use |channel-buffered| mode.
+    - 2. To read line-by-line, use the following code: >vim
 	let s:lines = ['']
 	func! s:on_event(job_id, data, event) dict
 	  let eof = (a:data == [''])
@@ -106,7 +108,7 @@ callbacks.
 
 Data can be sent to the channel using the |chansend()| function. Here is a
 simple example, echoing some data through a cat-process:
->
+>vim
     function! s:OnEvent(id, data, event) dict
       let str = join(a:data, "\n")
       echomsg str
@@ -117,7 +119,7 @@ simple example, echoing some data through a cat-process:
 
 Here is a example of setting a buffer to the result of grep, but only after
 all data has been processed:
->
+>vim
     function! s:OnEvent(id, data, event) dict
       call nvim_buf_set_lines(2, 0, -1, v:true, a:data)
     endfunction
@@ -140,7 +142,7 @@ However, change of PTY size can be signaled to the slave using |jobresize()|.
 See also |terminal-emulator|.
 
 Terminal characteristics (termios) for |:terminal| and PTY channels are copied
-from the host TTY, or if Nvim is |--headless| it uses default values: >
+from the host TTY, or if Nvim is |--headless| it uses default values: >vim
     :echo system('nvim --headless +"te stty -a" +"sleep 1" +"1,/^$/print" +q')
 
 ==============================================================================
@@ -161,7 +163,7 @@ used as a channel. See also |--embed|.
 Call |stdioopen()| during |startup| to open the stdio channel as |channel-id| 1.
 Nvim's stderr is always available as |v:stderr|, a write-only bytes channel.
 
-Example: >
+Example: >vim
     func! OnEvent(id, data, event)
       if a:data == [""]
         quit
@@ -170,7 +172,7 @@ Example: >
     endfunc
     call stdioopen({'on_stdin': 'OnEvent'})
 <
-Put this in `uppercase.vim` and run:  >
+Put this in `uppercase.vim` and run:  >bash
     nvim --headless --cmd "source uppercase.vim"
 
 ==============================================================================
@@ -210,13 +212,18 @@ effective prompt text for a buffer, with |prompt_getprompt()|.
 The user can go to Normal mode and navigate through the buffer.  This can be
 useful to see older output or copy text.
 
+The CTRL-W key can be used to start a window command, such as CTRL-W w to
+switch to the next window.  This also works in Insert mode (use Shift-CTRL-W
+to delete a word). When leaving the window Insert mode will be stopped.  When
+coming back to the prompt window Insert mode will be restored.
+
 Any command that starts Insert mode, such as "a", "i", "A" and "I", will move
 the cursor to the last line.  "A" will move to the end of the line, "I" to the
 start of the line.
 
 Here is an example for Unix.  It starts a shell in the background and prompts
 for the next shell command.  Output from the shell is displayed above the
-prompt. >
+prompt. >vim
 
 	" Function handling a line of text that has been typed.
 	func TextEntered(text)
@@ -224,12 +231,12 @@ prompt. >
 	  call chansend(g:shell_job, [a:text, ''])
 	endfunc
 
-	" Function handling output from the shell: Added above the prompt.
+	" Function handling output from the shell: Add it above the prompt.
 	func GotOutput(channel, msg, name)
 	  call append(line("$") - 1, a:msg)
 	endfunc
 
-	" Function handling the shell exit: close the window.
+	" Function handling the shell exits: close the window.
 	func JobExit(job, status, event)
 	  quit!
 	endfunc

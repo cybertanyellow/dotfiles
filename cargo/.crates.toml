@@ -1,0 +1,6 @@
+[v1]
+"bat 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)" = ["bat"]
+"deadwiki 0.1.27 (registry+https://github.com/rust-lang/crates.io-index)" = ["dead"]
+"fd-find 8.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = ["fd"]
+"hx 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = ["hx"]
+"ripgrep 13.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = ["rg"]

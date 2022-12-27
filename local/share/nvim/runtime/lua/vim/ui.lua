@@ -16,15 +16,33 @@ local M = {}
 ---               `items`, or the context in which select() was called.
 ---@param on_choice function ((item|nil, idx|nil) -> ())
 ---               Called once the user made a choice.
----               `idx` is the 1-based index of `item` within `item`.
+---               `idx` is the 1-based index of `item` within `items`.
 ---               `nil` if the user aborted the dialog.
+---
+---
+--- Example:
+--- <pre>lua
+--- vim.ui.select({ 'tabs', 'spaces' }, {
+---     prompt = 'Select tabs or spaces:',
+---     format_item = function(item)
+---         return "I'd like to choose " .. item
+---     end,
+--- }, function(choice)
+---     if choice == 'spaces' then
+---         vim.o.expandtab = true
+---     else
+---         vim.o.expandtab = false
+---     end
+--- end)
+--- </pre>
+
 function M.select(items, opts, on_choice)
-  vim.validate {
+  vim.validate({
     items = { items, 'table', false },
     on_choice = { on_choice, 'function', false },
-  }
+  })
   opts = opts or {}
-  local choices = {opts.prompt or 'Select one of:'}
+  local choices = { opts.prompt or 'Select one of:' }
   local format_item = opts.format_item or tostring
   for i, item in pairs(items) do
     table.insert(choices, string.format('%d: %s', i, format_item(item)))
@@ -41,7 +59,7 @@ end
 ---
 ---@param opts table Additional options. See |input()|
 ---     - prompt (string|nil)
----               Text of the prompt. Defaults to `Input: `.
+---               Text of the prompt
 ---     - default (string|nil)
 ---               Default reply to the input
 ---     - completion (string|nil)
@@ -55,19 +73,33 @@ end
 ---               user inputs.
 ---@param on_confirm function ((input|nil) -> ())
 ---               Called once the user confirms or abort the input.
----               `input` is what the user typed.
+---               `input` is what the user typed (it might be
+---               an empty string if nothing was entered), or
 ---               `nil` if the user aborted the dialog.
+---
+--- Example:
+--- <pre>lua
+--- vim.ui.input({ prompt = 'Enter value for shiftwidth: ' }, function(input)
+---     vim.o.shiftwidth = tonumber(input)
+--- end)
+--- </pre>
 function M.input(opts, on_confirm)
-  vim.validate {
+  vim.validate({
     on_confirm = { on_confirm, 'function', false },
-  }
+  })
 
-  opts = opts or {}
-  local input = vim.fn.input(opts)
-  if #input > 0 then
-    on_confirm(input)
-  else
+  opts = (opts and not vim.tbl_isempty(opts)) and opts or vim.empty_dict()
+
+  -- Note that vim.fn.input({}) returns an empty string when cancelled.
+  -- vim.ui.input() should distinguish aborting from entering an empty string.
+  local _canceled = vim.NIL
+  opts = vim.tbl_extend('keep', opts, { cancelreturn = _canceled })
+
+  local ok, input = pcall(vim.fn.input, opts)
+  if not ok or input == _canceled then
     on_confirm(nil)
+  else
+    on_confirm(input)
   end
 end
 

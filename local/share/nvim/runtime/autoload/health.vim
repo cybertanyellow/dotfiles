@@ -1,27 +1,3 @@
-function! s:enhance_syntax() abort
-  syntax case match
-
-  syntax keyword healthError ERROR[:]
-        \ containedin=markdownCodeBlock,mkdListItemLine
-  highlight default link healthError Error
-
-  syntax keyword healthWarning WARNING[:]
-        \ containedin=markdownCodeBlock,mkdListItemLine
-  highlight default link healthWarning WarningMsg
-
-  syntax keyword healthSuccess OK[:]
-        \ containedin=markdownCodeBlock,mkdListItemLine
-  highlight default healthSuccess guibg=#5fff00 guifg=#080808 ctermbg=82 ctermfg=232
-
-  syntax match healthHelp "|.\{-}|" contains=healthBar
-        \ containedin=markdownCodeBlock,mkdListItemLine
-  syntax match healthBar  "|" contained conceal
-  highlight default link healthHelp Identifier
-
-  " We do not care about markdown syntax errors in :checkhealth output.
-  highlight! link markdownError Normal
-endfunction
-
 " Runs the specified healthchecks.
 " Runs all discovered healthchecks if a:plugin_names is empty.
 function! health#check(plugin_names) abort
@@ -29,13 +5,14 @@ function! health#check(plugin_names) abort
         \ ? s:discover_healthchecks()
         \ : s:get_healthcheck(a:plugin_names)
 
-  tabnew
-  setlocal wrap breakindent linebreak
-  setlocal filetype=markdown
-  setlocal conceallevel=2 concealcursor=nc
-  setlocal keywordprg=:help
-  let &l:iskeyword='!-~,^*,^|,^",192-255'
-  call s:enhance_syntax()
+  " Create buffer and open in a tab, unless this is the default buffer when Nvim starts.
+  let emptybuf = (bufnr('$') == 1 && empty(getline(1)) && 1 == line('$'))
+  execute (emptybuf ? 'buffer' : 'tab sbuffer') nvim_create_buf(v:true, v:true)
+  if bufexists('health://')
+    bwipe health://
+  endif
+  file health://
+  setfiletype checkhealth
 
   if empty(healthchecks)
     call setline(1, 'ERROR: No healthchecks found.')
@@ -49,17 +26,24 @@ function! health#check(plugin_names) abort
           throw 'healthcheck_not_found'
         endif
         eval type == 'v' ? call(func, []) : luaeval(func)
+        " in the event the healthcheck doesn't return anything
+        " (the plugin author should avoid this possibility)
+        if len(s:output) == 0
+          throw 'healthcheck_no_return_value'
+        endif
       catch
         let s:output = []  " Clear the output
         if v:exception =~# 'healthcheck_not_found'
           call health#report_error('No healthcheck found for "'.name.'" plugin.')
+        elseif v:exception =~# 'healthcheck_no_return_value'
+          call health#report_error('The healthcheck report for "'.name.'" plugin is empty.')
         else
           call health#report_error(printf(
                 \ "Failed to run healthcheck for \"%s\" plugin. Exception:\n%s\n%s",
                 \ name, v:throwpoint, v:exception))
         endif
       endtry
-      let header = [name. ': ' . func, repeat('=', 72)]
+      let header = [repeat('=', 78), name .. ': ' .. func, '']
       " remove empty line after header from report_start
       let s:output = s:output[0] == '' ? s:output[1:] : s:output
       let s:output = header + s:output + ['']
@@ -68,10 +52,7 @@ function! health#check(plugin_names) abort
     endfor
   endif
 
-  " needed for plasticboy/vim-markdown, because it uses fdm=expr
-  normal! zR
-  setlocal nomodified
-  setlocal bufhidden=hide
+  " Clear the 'Running healthchecks...' message.
   redraw|echo ''
 endfunction
 
@@ -81,7 +62,7 @@ endfunction
 
 " Starts a new report.
 function! health#report_start(name) abort
-  call s:collect_output("\n## " . a:name)
+  call s:collect_output(printf("\n%s ~", a:name))
 endfunction
 
 " Indents lines *except* line 1 of a string if it contains newlines.
@@ -104,7 +85,7 @@ endfunction
 " Format a message for a specific report item.
 " a:1: Optional advice (string or list)
 function! s:format_report_message(status, msg, ...) abort " {{{
-  let output = '  - ' . a:status . ': ' . s:indent_after_line1(a:msg, 4)
+  let output = '- ' .. a:status .. (empty(a:status) ? '' : ' ') .. s:indent_after_line1(a:msg, 2)
 
   " Optional parameters
   if a:0 > 0
@@ -115,9 +96,9 @@ function! s:format_report_message(status, msg, ...) abort " {{{
 
     " Report each suggestion
     if !empty(advice)
-      let output .= "\n    - ADVICE:"
+      let output .= "\n  - ADVICE:"
       for suggestion in advice
-        let output .= "\n      - " . s:indent_after_line1(suggestion, 10)
+        let output .= "\n    - " . s:indent_after_line1(suggestion, 6)
       endfor
     endif
   endif
@@ -125,9 +106,9 @@ function! s:format_report_message(status, msg, ...) abort " {{{
   return s:help_to_link(output)
 endfunction " }}}
 
-" Use {msg} to report information in the current section
+" Reports a message as a listitem in the current section.
 function! health#report_info(msg) abort " {{{
-  call s:collect_output(s:format_report_message('INFO', a:msg))
+  call s:collect_output(s:format_report_message('', a:msg))
 endfunction " }}}
 
 " Reports a successful healthcheck.
@@ -157,7 +138,7 @@ endfunction " }}}
 
 " From a path return a list [{name}, {func}, {type}] representing a healthcheck
 function! s:filepath_to_healthcheck(path) abort
-  if a:path =~# 'vim$' 
+  if a:path =~# 'vim$'
     let name =  matchstr(a:path, '\zs[^\/]*\ze\.vim$')
     let func = 'health#'.name.'#check'
     let type = 'v'
@@ -194,6 +175,11 @@ function! s:get_healthcheck(plugin_names) abort
   for v in values(healthchecks)
     let output[v[0]] = v[1:]
   endfor
+  try
+    " vim.health is not a healthcheck, skip it
+    call remove(output, 'vim')
+  catch
+  endtry
   return output
 endfunction
 
@@ -211,7 +197,7 @@ function! s:get_healthcheck_list(plugin_names) abort
           \ + nvim_get_runtime_file('lua/**/'.p.'/health/init.lua', v:true)
           \ + nvim_get_runtime_file('lua/**/'.p.'/health.lua', v:true)
     if len(paths) == 0
-      let healthchecks += [[p, '', '']]  " healthchek not found
+      let healthchecks += [[p, '', '']]  " healthcheck not found
     else
       let healthchecks += map(uniq(sort(paths)),
             \'<SID>filepath_to_healthcheck(v:val)')

@@ -104,6 +104,8 @@ when the last window also has a status line:
 	'laststatus' = 0	never a status line
 	'laststatus' = 1	status line if there is more than one window
 	'laststatus' = 2	always a status line
+	'laststatus' = 3	have a global statusline at the bottom instead
+				of one for each window
 
 You can change the contents of the status line with the 'statusline' option.
 This option can be local to the window, so that you can have a different
@@ -116,13 +118,15 @@ other windows.  If 'mouse' is enabled, a status line can be dragged to resize
 windows.
 
 							*filler-lines*
-The lines after the last buffer line in a window are called filler lines.
-These lines start with a tilde (~) character. By default, these are
-highlighted as NonText (|hl-NonText|). The EndOfBuffer highlight group
-(|hl-EndOfBuffer|) can be used to change the highlighting of filler lines.
+The lines after the last buffer line in a window are called filler lines.  By
+default, these lines start with a tilde (~) character. The "eob" item in the
+'fillchars' option can be used to change this character. By default, these
+characters are highlighted as NonText (|hl-NonText|). The EndOfBuffer
+highlight group (|hl-EndOfBuffer|) can be used to change the highlighting of
+the filler characters.
 
 ==============================================================================
-3. Opening and closing a window				*opening-window* *E36*
+3. Opening and closing a window				*opening-window*
 
 CTRL-W s						*CTRL-W_s*
 CTRL-W S						*CTRL-W_S*
@@ -144,7 +148,7 @@ CTRL-W CTRL-S						*CTRL-W_CTRL-S*
 		Note: CTRL-S does not work on all terminals and might block
 		further input, use CTRL-Q to get going again.
 		Also see |++opt| and |+cmd|.
-							*E242*
+							*E242* *E1159*
 		Be careful when splitting a window in an autocommand, it may
 		mess up the window layout if this happens while making other
 		window layout changes.
@@ -159,6 +163,8 @@ CTRL-W v						*CTRL-W_v*
 		3. 'eadirection' isn't "ver", and
 		4. one of the other windows is wider than the current or new
 		   window.
+		If N was given make the new window N columns wide, if
+		possible.
 		Note: In other places CTRL-Q does the same as CTRL-V, but here
 		it doesn't!
 
@@ -221,12 +227,23 @@ CTRL-W ge						*CTRL-W_ge*
 
 Note that the 'splitbelow' and 'splitright' options influence where a new
 window will appear.
+								*E36*
+Creating a window will fail if there is not enough room.  Every window needs
+at least one screen line and column, sometimes more.   Options 'winminheight'
+and 'winminwidth' are relevant.
 
 						*:vert* *:vertical*
 :vert[ical] {cmd}
 		Execute {cmd}.  If it contains a command that splits a window,
-		it will be split vertically.
+		it will be split vertically.  For `vertical wincmd =` windows
+		will be equalized only vertically.
 		Doesn't work for |:execute| and |:normal|.
+
+						*:hor* *:horizontal*
+:hor[izontal] {cmd}
+		Execute {cmd}.  Currently only makes a difference for
+		`horizontal wincmd =`, which will equalize windows only
+		horizontally.
 
 :lefta[bove] {cmd}				*:lefta* *:leftabove*
 :abo[veleft] {cmd}				*:abo* *:aboveleft*
@@ -274,9 +291,8 @@ Closing a window
 :{count}q[uit]						*:count_quit*
 CTRL-W q						*CTRL-W_q*
 CTRL-W CTRL-Q						*CTRL-W_CTRL-Q*
-		Without {count}: Quit the current window. If {count} is
-		given quit the {count} window
-
+		Without {count}: Quit the current window.  If {count} is
+		given quit the {count} window.
 							*edit-window*
 		When quitting the last edit window (not counting help or
 		preview windows), exit Vim.
@@ -335,7 +351,7 @@ CTRL-W CTRL-C						*CTRL-W_CTRL-C*
 		window, but that does not work, because the CTRL-C cancels the
 		command.
 
-                                                                *:hide*
+							*:hide*
 :hid[e]
 :{count}hid[e]
 		Without {count}: Quit the current window, unless it is the
@@ -364,7 +380,7 @@ CTRL-W o						*CTRL-W_o* *E445*
 CTRL-W CTRL-O					*CTRL-W_CTRL-O* *:on* *:only*
 		Make the current window the only one on the screen. All other
 		windows are closed.  For {count} see the `:quit` command
- 		above |:count_quit|.
+		above |:count_quit|.
 
 		When the 'hidden' option is set, all buffers in closed windows
 		become hidden.
@@ -434,6 +450,7 @@ position is set to keep the same Visual area selected.
 These commands can also be executed with ":wincmd":
 
 :[count]winc[md] {arg}
+:winc[md] [count] {arg}
 		Like executing CTRL-W [count] {arg}.  Example: >
 			:wincmd j
 <		Moves to the window below the current one.
@@ -441,7 +458,7 @@ These commands can also be executed with ":wincmd":
 		the |CursorHold| autocommand event).  Or when a Normal mode
 		command is inconvenient.
 		The count can also be a window number.  Example: >
-			:exe nr . "wincmd w"
+			:exe nr .. "wincmd w"
 <		This goes to window "nr".
 
 ==============================================================================
@@ -519,6 +536,10 @@ CTRL-W =	Make all windows (almost) equally high and wide, but use
 		'winheight' and 'winwidth' for the current window.
 		Windows with 'winfixheight' set keep their height and windows
 		with 'winfixwidth' set keep their width.
+		To equalize only vertically (make window equally high) use
+		`vertical wincmd =` .
+		To equalize only horizontally (make window equally wide) use
+		`horizontal wincmd =` .
 
 :res[ize] -N					*:res* *:resize* *CTRL-W_-*
 CTRL-W -	Decrease current window height by N (default 1).
@@ -585,6 +606,53 @@ it).
 
 The minimal height and width of a window is set with 'winminheight' and
 'winminwidth'.  These are hard values, a window will never become smaller.
+
+
+WinScrolled and WinResized autocommands ~
+						*win-scrolled-resized*
+If you want to get notified of changes in window sizes, the |WinResized|
+autocommand event can be used.
+If you want to get notified of text in windows scrolling vertically or
+horizontally, the |WinScrolled| autocommand event can be used.  This will also
+trigger in window size changes.
+Exception: the events will not be triggered when the text scrolls for
+'incsearch'.
+							*WinResized-event*
+The |WinResized| event is triggered after updating the display, several
+windows may have changed size then.  A list of the IDs of windows that changed
+since last time is provided in the v:event.windows variable, for example:
+	[1003, 1006]
+							*WinScrolled-event*
+The |WinScrolled| event is triggered after |WinResized|, and also if a window
+was scrolled.  That can be vertically (the text at the top of the window
+changed) or horizontally (when 'wrap' is off or when the first displayed part
+of the first line changes).  Note that |WinScrolled| will trigger many more
+times than |WinResized|, it may slow down editing a bit.
+
+The information provided by |WinScrolled| is a dictionary for each window that
+has changes, using the window ID as the key, and a total count of the changes
+with the key "all".  Example value for |v:event|:
+	{
+	   all: {width: 0, height: 2, leftcol: 0, skipcol: 0, topline: 1, topfill: 0},
+	   1003: {width: 0, height: -1, leftcol: 0, skipcol: 0, topline: 0, topfill: 0},
+	   1006: {width: 0, height: 1, leftcol: 0, skipcol: 0, topline: 1, topfill: 0},
+	}
+
+Note that the "all" entry has the absolute values of the individual windows
+accumulated.
+
+If you need more information about what changed, or you want to "debounce" the
+events (not handle every event to avoid doing too much work), you may want to
+use the `winlayout()` and `getwininfo()` functions.
+
+|WinScrolled| and |WinResized| do not trigger when the first autocommand is
+added, only after the first scroll or resize.  They may trigger when switching
+to another tab page.
+
+The commands executed are expected to not cause window size or scroll changes.
+If this happens anyway, the event will trigger again very soon.  In other
+words: Just before triggering the event, the current sizes and scroll
+positions are stored and used to decide whether there was a change.
 
 ==============================================================================
 7. Argument and buffer list commands			*buffer-list*
@@ -729,6 +797,7 @@ can also get to them with the buffer list commands, like ":bnext".
 			the current window.
 			{cmd} can contain '|' to concatenate several commands.
 			{cmd} must not open or close windows or reorder them.
+
 			Also see |:tabdo|, |:argdo|, |:bufdo|, |:cdo|, |:ldo|,
 			|:cfdo| and |:lfdo|.
 
@@ -756,6 +825,7 @@ can also get to them with the buffer list commands, like ":bnext".
 			autocommand event is disabled by adding it to
 			'eventignore'.  This considerably speeds up editing
 			each buffer.
+
 			Also see |:tabdo|, |:argdo|, |:windo|, |:cdo|, |:ldo|,
 			|:cfdo| and |:lfdo|.
 
@@ -903,12 +973,12 @@ CTRL-W g }						*CTRL-W_g}*
 		cursor.  This is less clever than using |:ptag|, but you don't
 		need a tags file and it will also find matches in system
 		include files.  Example: >
-  :au! CursorHold *.[ch] ++nested exe "silent! psearch " . expand("<cword>")
+  :au! CursorHold *.[ch] ++nested exe "silent! psearch " .. expand("<cword>")
 <		Warning: This can be slow.
 
 Example						*CursorHold-example*  >
 
-  :au! CursorHold *.[ch] ++nested exe "silent! ptag " . expand("<cword>")
+  :au! CursorHold *.[ch] ++nested exe "silent! ptag " .. expand("<cword>")
 
 This will cause a ":ptag" to be executed for the keyword under the cursor,
 when the cursor hasn't moved for the time set with 'updatetime'.  "++nested"
@@ -931,14 +1001,14 @@ is no word under the cursor, and a few other things: >
   :
   :    " Delete any existing highlight before showing another tag
   :    silent! wincmd P			" jump to preview window
-  :    if &previewwindow			" if we really get there...
+  :    if &previewwindow		" if we really get there...
   :      match none			" delete existing highlight
   :      wincmd p			" back to old window
   :    endif
   :
   :    " Try displaying a matching tag for the word under the cursor
   :    try
-  :       exe "ptag " . w
+  :       exe "ptag " .. w
   :    catch
   :      return
   :    endtry
@@ -950,10 +1020,10 @@ is no word under the cursor, and a few other things: >
   :	 endif
   :	 call search("$", "b")		" to end of previous line
   :	 let w = substitute(w, '\\', '\\\\', "")
-  :	 call search('\<\V' . w . '\>')	" position cursor on match
+  :	 call search('\<\V' .. w .. '\>')	" position cursor on match
   :	 " Add a match highlight to the word at this position
   :      hi previewWord term=bold ctermbg=green guibg=green
-  :	 exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+  :	 exe 'match previewWord "\%' .. line(".") .. 'l\%' .. col(".") .. 'c\k*"'
   :      wincmd p			" back to old window
   :    endif
   :  endif
@@ -975,7 +1045,7 @@ modified, but is forced (with '!') to be removed from a window, and
 'autowrite' is off or the buffer can't be written.
 
 You can make a hidden buffer not hidden by starting to edit it with any
-command.  Or by deleting it with the ":bdelete" command.
+command, or by deleting it with the ":bdelete" command.
 
 The 'hidden' is global, it is used for all buffers.  The 'bufhidden' option
 can be used to make an exception for a specific buffer.  It can take these

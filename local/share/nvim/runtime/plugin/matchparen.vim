@@ -1,12 +1,11 @@
 " Vim plugin for showing matching parens
 " Maintainer:  Bram Moolenaar <Bram@vim.org>
-" Last Change: 2021 Apr 08
+" Last Change: 2022 Dec 01
 
 " Exit quickly when:
 " - this plugin was already loaded (or disabled)
 " - when 'compatible' is set
-" - the "CursorMoved" autocmd event is not available.
-if exists("g:loaded_matchparen") || &cp || !exists("##CursorMoved")
+if exists("g:loaded_matchparen") || &cp
   finish
 endif
 let g:loaded_matchparen = 1
@@ -20,8 +19,8 @@ endif
 
 augroup matchparen
   " Replace all matchparen autocommands
-  autocmd! CursorMoved,CursorMovedI,WinEnter * call s:Highlight_Matching_Pair()
-  autocmd! WinLeave * call s:Remove_Matches()
+  autocmd! CursorMoved,CursorMovedI,WinEnter,BufWinEnter,WinScrolled * call s:Highlight_Matching_Pair()
+  autocmd! WinLeave,BufLeave * call s:Remove_Matches()
   if exists('##TextChanged')
     autocmd! TextChanged,TextChangedI * call s:Highlight_Matching_Pair()
   endif

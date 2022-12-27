@@ -32,9 +32,6 @@ If you are working in a special language mode when inserting text, see the
 'langmap' option, |'langmap'|, on how to avoid switching this mode on and off
 all the time.
 
-If you have 'insertmode' set, <Esc> and a few other keys get another meaning.
-See |'insertmode'|.
-
 char		action	~
 -----------------------------------------------------------------------
 						*i_CTRL-[* *i_<Esc>*
@@ -42,7 +39,7 @@ char		action	~
 		abbreviation.
 		Note: If your <Esc> key is hard to hit, try CTRL-[ instead.
 						*i_META* *i_ALT*
-		ALT (|META|) acts like <Esc> if the chord is not mapped.
+		ALT (|META|) may act like <Esc> if the chord is not mapped.
 		For example <A-x> acts like <Esc>x if <A-x> does not have an
 		insert-mode mapping.
 						*i_CTRL-C*
@@ -76,6 +73,8 @@ CTRL-U		Delete all entered characters before the cursor in the current
 		line.  If there are no newly entered characters and
 		'backspace' is not empty, delete all characters before the
 		cursor in the current line.
+		If C-indenting is enabled the indent will be adjusted if the
+		line becomes blank.
 		See |i_backspacing| about joining lines.
 						*i_CTRL-U-default*
 		By default, sets a new undo point before deleting.
@@ -190,12 +189,14 @@ CTRL-D		Delete one shiftwidth of indent at the start of the current
 		label.
 
 						*i_CTRL-V*
-CTRL-V		Insert next non-digit literally.  For special keys, the
-		terminal code is inserted.  It's also possible to enter the
-		decimal, octal or hexadecimal value of a character
+CTRL-V		Insert next non-digit literally.  It's also possible to enter
+		the decimal, octal or hexadecimal value of a character
 		|i_CTRL-V_digit|.
 		The characters typed right after CTRL-V are not considered for
 		mapping.
+		For special keys, the CTRL modifier may be included into the
+		key to produce a control character.  If there is no control
+		character for the key then its |key-notation| is inserted.
 		Note: When CTRL-V is mapped (e.g., to paste text) you can
 		often use CTRL-Q instead |i_CTRL-Q|.
 
@@ -203,6 +204,10 @@ CTRL-V		Insert next non-digit literally.  For special keys, the
 CTRL-Q		Same as CTRL-V.
 		Note: Some terminal connections may eat CTRL-Q, it doesn't
 		work then.  It does work in the GUI.
+
+CTRL-SHIFT-V				*i_CTRL-SHIFT-V* *i_CTRL-SHIFT-Q*
+CTRL-SHIFT-Q	Works just like CTRL-V, but do not try to include the CTRL
+		modifier into the key.
 
 CTRL-X		Enter CTRL-X mode.  This is a sub-mode where commands can
 		be given to complete words or scroll the window.  See
@@ -256,7 +261,7 @@ CTRL-]		Trigger abbreviation, without inserting a character.
 
 						*i_backspacing*
 The effect of the <BS>, CTRL-W, and CTRL-U depend on the 'backspace' option
-(unless 'revins' is set).  This is a comma separated list of items:
+(unless 'revins' is set).  This is a comma-separated list of items:
 
 item	    action ~
 indent	    allow backspacing over autoindent
@@ -267,8 +272,8 @@ start	    allow backspacing over the start position of insert; CTRL-W and
 When 'backspace' is empty, Vi compatible backspacing is used.  You cannot
 backspace over autoindent, before column 1 or before where insert started.
 
-For backwards compatibility the values "0", "1" and "2" are also allowed, see
-|'backspace'|.
+For backwards compatibility the values "0", "1", "2" and "3" are also allowed,
+see |'backspace'|.
 
 If the 'backspace' option does contain "eol" and the cursor is in column 1
 when one of the three keys is used, the current line is joined with the
@@ -327,9 +332,8 @@ that key is interpreted as in Insert mode.
 The following keys are special.  They stop the current insert, do something,
 and then restart insertion.  This means you can do something without getting
 out of Insert mode.  This is very handy if you prefer to use the Insert mode
-all the time, just like editors that don't have a separate Normal mode.  You
-may also want to set the 'insertmode' option.  You can use CTRL-O if you want
-to map a function key to a command.
+all the time, just like editors that don't have a separate Normal mode. You
+can use CTRL-O if you want to map a function key to a command.
 
 The changes (inserted or deleted characters) before and after these keys can
 be undone separately.  Only the last change can be redone and always behaves
@@ -370,11 +374,10 @@ CTRL-G CTRL-J	cursor one line down, insert start column    *i_CTRL-G_CTRL-J*
 <S-ScrollWheelRight> move window one page right		*i_<S-ScrollWheelRight>*
 CTRL-O		execute one command, return to Insert mode   *i_CTRL-O*
 CTRL-\ CTRL-O	like CTRL-O but don't move the cursor	     *i_CTRL-\_CTRL-O*
-CTRL-L		when 'insertmode' is set: go to Normal mode  *i_CTRL-L*
-CTRL-G u	break undo sequence, start new change	     *i_CTRL-G_u*
-CTRL-G U	don't break undo with next left/right cursor *i_CTRL-G_U*
-		movement, if the cursor stays within the
-		same the line
+CTRL-G u	close undo sequence, start new change	     *i_CTRL-G_u*
+CTRL-G U	don't start a new undo block with the next   *i_CTRL-G_U*
+		left/right cursor movement, if the cursor
+		stays within the same line
 -----------------------------------------------------------------------
 
 The CTRL-O command sometimes has a side effect: If the cursor was beyond the
@@ -408,8 +411,8 @@ that, with CTRL-O u.  Another example: >
 
 	:inoremap <CR> <C-]><C-G>u<CR>
 
-This breaks undo at each line break.  It also expands abbreviations before
-this.
+This starts a new undo block at each line break.  It also expands
+abbreviations before this.
 
 An example for using CTRL-G U: >
 
@@ -423,9 +426,9 @@ An example for using CTRL-G U: >
 	inoremap <expr> <End> repeat('<C-G>U<Right>', col('$') - col('.'))
 	inoremap ( ()<C-G>U<Left>
 
-This makes it possible to use the cursor keys in Insert mode, without breaking
-the undo sequence and therefore using |.| (redo) will work as expected.
-Also entering a text like (with the "(" mapping from above):
+This makes it possible to use the cursor keys in Insert mode, without starting
+a new undo block and therefore using |.| (redo) will work as expected.  Also
+entering a text like (with the "(" mapping from above):
 
    Lorem ipsum (dolor
 
@@ -647,19 +650,21 @@ When the popup menu is displayed there are a few more special keys, see
 |popupmenu-keys|.
 
 Note: The keys that are valid in CTRL-X mode are not mapped.  This allows for
-":map ^F ^X^F" to work (where ^F is CTRL-F and ^X is CTRL-X).  The key that
-ends CTRL-X mode (any key that is not a valid CTRL-X mode command) is mapped.
-Also, when doing completion with 'complete' mappings apply as usual.
+`:map <C-F> <C-X><C-F>` to work.  The key that ends CTRL-X mode (any key that
+is not a valid CTRL-X mode command) is mapped. Also, when doing completion
+with 'complete' mappings apply as usual.
 
-Note: While completion is active Insert mode can't be used recursively.
-Mappings that somehow invoke ":normal i.." will generate an E523 error.
+								*E565*
+Note: While completion is active Insert mode can't be used recursively and
+buffer text cannot be changed.  Mappings that somehow invoke ":normal i.."
+will generate an E565 error.
 
 The following mappings are suggested to make typing the completion commands
 a bit easier (although they will hide other commands): >
-    :inoremap ^] ^X^]
-    :inoremap ^F ^X^F
-    :inoremap ^D ^X^D
-    :inoremap ^L ^X^L
+    :inoremap <C-]> <C-X><C-]>
+    :inoremap <C-F> <C-X><C-F>
+    :inoremap <C-D> <C-X><C-D>
+    :inoremap <C-L> <C-X><C-L>
 
 As a special case, typing CTRL-R to perform register insertion (see
 |i_CTRL-R|) will not exit CTRL-X mode.  This is primarily to allow the use of
@@ -778,7 +783,7 @@ If the previous expansion was split, because it got longer than 'textwidth',
 then just the text in the current line will be used.
 
 If the match found is at the end of a line, then the first word in the next
-line will be inserted and the message "word from next line" displayed, if
+line will be inserted and the message "Word from other line" displayed, if
 this word is accepted the next CTRL-X CTRL-P or CTRL-X CTRL-N will search
 for those lines starting with this word.
 
@@ -796,6 +801,7 @@ CTRL-X CTRL-K		Search the files given with the 'dictionary' option
 			the 'dictionary' option is empty.
 			For suggestions where to find a list of words, see the
 			'dictionary' option.
+			'ignorecase', 'smartcase' and 'infercase' apply.
 
 	CTRL-K	or
 	CTRL-N		Search forward for next matching keyword.  This
@@ -803,6 +809,9 @@ CTRL-X CTRL-K		Search the files given with the 'dictionary' option
 
 	CTRL-P		Search backwards for next matching keyword.  This
 			keyword replaces the previous matching keyword.
+
+
+Completing words in 'thesaurus'				*compl-thesaurus*
 
 							*i_CTRL-X_CTRL-T*
 CTRL-X CTRL-T		Works as CTRL-X CTRL-K, but in a special way.  It uses
@@ -812,22 +821,63 @@ CTRL-X CTRL-T		Works as CTRL-X CTRL-K, but in a special way.  It uses
 			matches, even though they don't complete the word.
 			Thus a word can be completely replaced.
 
-			For an example, imagine the 'thesaurus' file has a
-			line like this: >
-				angry furious mad enraged
-<			Placing the cursor after the letters "ang" and typing
-			CTRL-X CTRL-T would complete the word "angry";
-			subsequent presses would change the word to "furious",
-			"mad" etc.
-			Other uses include translation between two languages,
-			or grouping API functions by keyword.
-
 	CTRL-T	or
 	CTRL-N		Search forward for next matching keyword.  This
 			keyword replaces the previous matching keyword.
 
 	CTRL-P		Search backwards for next matching keyword.  This
 			keyword replaces the previous matching keyword.
+
+In the file used by the 'thesaurus' option each line in the file should
+contain words with similar meaning, separated by non-keyword characters (white
+space is preferred).  Maximum line length is 510 bytes.
+
+For an example, imagine the 'thesaurus' file has a line like this: >
+	angry furious mad enraged
+Placing the cursor after the letters "ang" and typing CTRL-X CTRL-T would
+complete the word "angry"; subsequent presses would change the word to
+"furious", "mad" etc.
+
+Other uses include translation between two languages, or grouping API
+functions by keyword.
+
+An English word list was added to this github issue:
+https://github.com/vim/vim/issues/629#issuecomment-443293282
+Unpack thesaurus_pkg.zip, put the thesaurus.txt file somewhere, e.g.
+~/.vim/thesaurus/english.txt, and the 'thesaurus' option to this file name.
+
+
+Completing keywords with 'thesaurusfunc'		*compl-thesaurusfunc*
+
+If the 'thesaurusfunc' option is set, then the user specified function is
+invoked to get the list of completion matches and the 'thesaurus' option is
+not used. See |complete-functions| for an explanation of how the function is
+invoked and what it should return.
+
+Here is an example that uses the "aiksaurus" command (provided by Magnus
+Groß): >
+
+    func Thesaur(findstart, base)
+      if a:findstart
+	return searchpos('\<', 'bnW', line('.'))[1] - 1
+      endif
+      let res = []
+      let h = ''
+      for l in systemlist('aiksaurus ' .. shellescape(a:base))
+	if l[:3] == '=== '
+	  let h = '(' .. substitute(l[4:], ' =*$', ')', '')
+	elseif l ==# 'Alphabetically similar known words are: '
+	  let h = "\U0001f52e"
+	elseif l[0] =~ '\a' || (h ==# "\U0001f52e" && l[0] ==# "\t")
+	  call extend(res, map(split(substitute(l, '^\t', '', ''), ', '), {_, val -> {'word': val, 'menu': h}}))
+	endif
+      endfor
+      return res
+    endfunc
+
+    if exists('+thesaurusfunc')
+      set thesaurusfunc=Thesaur
+    endif
 
 
 Completing keywords in the current and included files	*compl-keyword*
@@ -1032,7 +1082,7 @@ CTRL-X CTRL-Z		Stop completion without changing the text.
 
 FUNCTIONS FOR FINDING COMPLETIONS			*complete-functions*
 
-This applies to 'completefunc' and 'omnifunc'.
+This applies to 'completefunc', 'thesaurusfunc' and 'omnifunc'.
 
 The function is called in two different ways:
 - First the function is called to find the start of the text to be completed.
@@ -1074,7 +1124,8 @@ that contains the List.  The Dict can have these items:
 			leading text is changed.
 Other items are ignored.
 
-For acting upon end of completion, see the |CompleteDone| autocommand event.
+For acting upon end of completion, see the |CompleteDonePre| and
+|CompleteDone| autocommand event.
 
 For example, the function can contain this: >
 	let matches = ... list of words ...
@@ -1151,7 +1202,7 @@ An example that completes the names of the months: >
 	    " find months matching with "a:base"
 	    let res = []
 	    for m in split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec")
-	      if m =~ '^' . a:base
+	      if m =~ '^' .. a:base
 		call add(res, m)
 	      endif
 	    endfor
@@ -1173,7 +1224,7 @@ The same, but now pretending searching for matches is slow: >
 	  else
 	    " find months matching with "a:base"
 	    for m in split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec")
-	      if m =~ '^' . a:base
+	      if m =~ '^' .. a:base
 		call complete_add(m)
 	      endif
 	      sleep 300m	" simulate searching for next match
@@ -1293,15 +1344,12 @@ in 'runtimepath'.  Thus for "java" it is autoload/javacomplete.vim.
 
 C							*ft-c-omni*
 
-Completion of C code requires a tags file.  You should use Exuberant ctags,
-because it adds extra information that is needed for completion.  You can find
-it here: http://ctags.sourceforge.net/  Version 5.6 or later is recommended.
+Completion of C code requires a tags file.  You should use Universal/
+Exuberant ctags, because it adds extra information that is needed for
+completion.  You can find it here:
+	Universal Ctags: https://ctags.io
 
-For version 5.5.4 you should add a patch that adds the "typename:" field:
-	ftp://ftp.vim.org/pub/vim/unstable/patches/ctags-5.5.4.patch
-A compiled .exe for MS-Windows can be found at:
-	http://ctags.sourceforge.net/
-	https://github.com/universal-ctags/ctags-win32
+Universal Ctags is preferred, Exuberant Ctags is no longer maintained.
 
 If you want to complete system functions you can do something like this.  Use
 ctags to generate a tags file for all the system header files: >
@@ -1401,7 +1449,7 @@ DOM compatibility
 At the moment (beginning of 2006) there are two main browsers - MS Internet
 Explorer and Mozilla Firefox. These two applications are covering over 90% of
 market. Theoretically standards are created by W3C organisation
-(http://www.w3c.org) but they are not always followed/implemented.
+(https://www.w3.org/) but they are not always followed/implemented.
 
 		IE	FF	W3C  Omni completion ~
 		+/-	+/-	+    +		     ~
@@ -1418,8 +1466,10 @@ will be suggested. All other elements are not placed in suggestion list.
 PHP							*ft-php-omni*
 
 Completion of PHP code requires a tags file for completion of data from
-external files and for class aware completion. You should use Exuberant ctags
-version 5.5.4 or newer. You can find it here: http://ctags.sourceforge.net/
+external files and for class aware completion. You should use Universal/
+Exuberant ctags version 5.5.4 or newer. You can find it here:
+
+	Universal Ctags: https://ctags.io
 
 Script completes:
 
@@ -1459,7 +1509,7 @@ RUBY						 *ft-ruby-omni*
 NOTE: |compl-omni| for Ruby code requires |provider-ruby| to be installed.
 
 Ruby completion will parse your buffer on demand in order to provide a list of
-completions.  These completions will be drawn from modules loaded by 'require'
+completions.  These completions will be drawn from modules loaded by "require"
 and modules defined in the current buffer.
 
 The completions provided by CTRL-X CTRL-O are sensitive to the context:
@@ -1473,7 +1523,7 @@ The completions provided by CTRL-X CTRL-O are sensitive to the context:
  3. After '.', '::' or ':'	     Methods applicable to the object being
 				       dereferenced
 
- 4. After ':' or ':foo'		     Symbol name (beginning with 'foo')
+ 4. After ':' or ':foo'		     Symbol name (beginning with "foo")
 
 Notes:
  - Vim will load/evaluate code in order to provide completions.  This may
@@ -1699,7 +1749,7 @@ In the example four special elements are visible:
    dialect.
 2. If the list containing possible values of attributes has one element and
    this element is equal to the name of the attribute this attribute will be
-   treated as boolean and inserted as 'attrname' and not as 'attrname="'
+   treated as boolean and inserted as "attrname" and not as 'attrname="'
 3. "vimxmltaginfo" - a special key with a Dictionary containing tag
    names as keys and two element List as values, for additional menu info and
    the long description.
@@ -1718,12 +1768,12 @@ DTD -> Vim							*dtd2vim*
 On |www| is the script |dtd2vim| which parses DTD and creates an XML data file
 for Vim XML omni completion.
 
-    dtd2vim: http://www.vim.org/scripts/script.php?script_id=1462
+    dtd2vim: https://www.vim.org/scripts/script.php?script_id=1462
 
 Check the beginning of that file for usage details.
 The script requires perl and:
 
-    perlSGML: http://savannah.nongnu.org/projects/perlsgml
+    perlSGML: https://savannah.nongnu.org/projects/perlsgml
 
 
 Commands
@@ -1815,14 +1865,10 @@ gi			Insert text in the same position as where Insert mode
 							*o*
 o			Begin a new line below the cursor and insert text,
 			repeat [count] times.
-			When the '#' flag is in 'cpoptions' the count is
-			ignored.
 
 							*O*
 O			Begin a new line above the cursor and insert text,
 			repeat [count] times.
-			When the '#' flag is in 'cpoptions' the count is
-			ignored.
 
 These commands are used to start inserting text.  You can end insert mode with
 <Esc>.  See |mode-ins-repl| for the other special characters in Insert mode.
@@ -1831,6 +1877,9 @@ The effect of [count] takes place after Insert mode is exited.
 When 'autoindent' is on, the indent for a new line is obtained from the
 previous line.  When 'smartindent' or 'cindent' is on, the indent for a line
 is automatically adjusted for C programs.
+
+'formatoptions' can be set to copy the comment leader when opening a new
+line.
 
 'textwidth' can be set to the maximum width for a line.  When a line becomes
 too long when appending characters a line break is automatically inserted.

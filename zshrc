@@ -53,7 +53,7 @@
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git server fzf)
+plugins=(git fzf history zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -66,7 +66,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
-   export EDITOR='vim'
+   export EDITOR='nvim'
 # else
 #   export EDITOR='mvim'
 # fi
@@ -93,5 +93,5 @@ PERL_MB_OPT="--install_base \"/home/yellow/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/home/yellow/perl5"; export PERL_MM_OPT;
 
 
-source /home/yellow/.config/broot/launcher/bash/br
+# source /home/yellow/.config/broot/launcher/bash/br
 eval "$(starship init zsh)"

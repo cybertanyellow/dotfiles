@@ -2,7 +2,7 @@
 # VERSION: 3.0
 SETUVAR --export STARSHIP_SHELL:fish
 SETUVAR VIRTUAL_ENV_DISABLE_PROMPT:1
-SETUVAR __fish_initialized:3100
+SETUVAR __fish_initialized:3400
 SETUVAR _fisher_jorgebucaran_2F_fisher_files:/home/yellow/\x2econfig/fish/functions/fisher\x2efish\x1e/home/yellow/\x2econfig/fish/completions/fisher\x2efish
 SETUVAR _fisher_jorgebucaran_2F_nvm_2E_fish_files:/home/yellow/\x2econfig/fish/functions/nvm\x2efish\x1e/home/yellow/\x2econfig/fish/functions/_nvm_index_update\x2efish\x1e/home/yellow/\x2econfig/fish/functions/_nvm_list\x2efish\x1e/home/yellow/\x2econfig/fish/functions/_nvm_version_activate\x2efish\x1e/home/yellow/\x2econfig/fish/functions/_nvm_version_deactivate\x2efish\x1e/home/yellow/\x2econfig/fish/conf\x2ed/nvm\x2efish\x1e/home/yellow/\x2econfig/fish/completions/nvm\x2efish
 SETUVAR _fisher_kidonng_2F_starship_2E_fish_files:/home/yellow/\x2econfig/fish/functions/fish_mode_prompt\x2efish\x1e/home/yellow/\x2econfig/fish/functions/fish_prompt\x2efish\x1e/home/yellow/\x2econfig/fish/conf\x2ed/starship\x2efish\x1e/home/yellow/\x2econfig/fish/completions/starship\x2efish

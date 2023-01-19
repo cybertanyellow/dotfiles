@@ -63,13 +63,28 @@ require("packer").startup(function(use)
 	cmake --install build --prefix build'
   })
 
-  -- Some color scheme other then default
-  use("arcticicestudio/nord-vim")
+  use("nvim-treesitter/nvim-treesitter")
   use("tpope/vim-fugitive")
-  use("christoomey/vim-tmux-navigator")
+
+  -- Some color scheme other then default
+  -- use("arcticicestudio/nord-vim")
   use("NLKNguyen/papercolor-theme")
   use({"itchyny/lightline.vim", colorscheme = 'PaperColor'})
-  use("nvim-treesitter/nvim-treesitter")
+
+  --use("christoomey/vim-tmux-navigator")
+  use { 'alexghergh/nvim-tmux-navigation', config = function()
+	  require'nvim-tmux-navigation'.setup {
+		  disable_when_zoomed = true, -- defaults to false
+		  keybindings = {
+			  left = "<C-h>",
+			  down = "<C-j>",
+			  up = "<C-k>",
+			  right = "<C-l>",
+			  last_active = "<C-\\>",
+			  next = "<C-Space>",
+		  }
+	  }
+	  end }
 end)
 
 -- the first run will install packer and our plugins
@@ -96,7 +111,7 @@ local function on_attach(client, buffer)
     vim.keymap.set("n", "<c-]>", vim.lsp.buf.definition, keymap_opts)
     vim.keymap.set("n", "K", vim.lsp.buf.hover, keymap_opts)
     vim.keymap.set("n", "gD", vim.lsp.buf.implementation, keymap_opts)
-    vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
+    -- conflict with tmux-navigate. vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
     vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, keymap_opts)
     vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
     vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, keymap_opts)

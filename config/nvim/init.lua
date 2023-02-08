@@ -68,23 +68,30 @@ require("packer").startup(function(use)
 
   -- Some color scheme other then default
   -- use("arcticicestudio/nord-vim")
-  use("NLKNguyen/papercolor-theme")
-  use({"itchyny/lightline.vim", colorscheme = 'PaperColor'})
+  -- use("NLKNguyen/papercolor-theme")
+  -- use({"itchyny/lightline.vim", colorscheme = 'PaperColor'})
+  -- use("folke/tokyonight.nvim")
+  -- use('olimorris/onedarkpro.nvim')
+  -- use('sainnhe/everforest')
+  use('rebelot/kanagawa.nvim')
+  use({'nvim-lualine/lualine.nvim',
+    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+  })
 
-  --use("christoomey/vim-tmux-navigator")
-  use { 'alexghergh/nvim-tmux-navigation', config = function()
-	  require'nvim-tmux-navigation'.setup {
-		  disable_when_zoomed = true, -- defaults to false
-		  keybindings = {
-			  left = "<C-h>",
-			  down = "<C-j>",
-			  up = "<C-k>",
-			  right = "<C-l>",
-			  last_active = "<C-\\>",
-			  next = "<C-Space>",
-		  }
-	  }
-	  end }
+--  use { 'alexghergh/nvim-tmux-navigation', config = function()
+--	  require'nvim-tmux-navigation'.setup {
+--		  disable_when_zoomed = true, -- defaults to false
+--		  keybindings = {
+--			  left = "<C-h>",
+--			  down = "<C-j>",
+--			  up = "<C-k>",
+--			  right = "<C-l>",
+--			  last_active = "<C-\\>",
+--			  next = "<C-Space>",
+--		  }
+--	  }
+--	  end }
+  use('alexghergh/nvim-tmux-navigation')
 end)
 
 -- the first run will install packer and our plugins
@@ -93,7 +100,21 @@ if packer_bootstrap then
   return
 end
 
-vim.cmd([[ colorscheme PaperColor ]])
+-- vim.cmd([[ colorscheme PaperColor ]])
+-- vim.cmd[[colorscheme tokyonight-moon]]
+-- vim.cmd[[colorscheme onedark]]
+-- vim.cmd[[colorscheme everforest]]
+vim.cmd[[colorscheme kanagawa]]
+
+require("lualine").setup({
+  --{ theme = 'PaperColor' },
+  --{ theme = 'tokyonight-moon' },
+  -- { theme = 'onedark' },
+  -- { theme = 'everforest' },
+  { theme = 'kanagawa' },
+})
+
+
 
 -- Set completeopt to have a better completion experience
 -- :help completeopt
@@ -169,6 +190,7 @@ local opts = {
 }
 
 require("rust-tools").setup(opts)
+require("lspconfig").clangd.setup{}
 
 -- Setup Completion
 -- See https://github.com/hrsh7th/nvim-cmp#basic-configuration
@@ -234,4 +256,16 @@ vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
-vim.keymap.set('n', '<leader>vv', "<C-w>v", {})
+vim.keymap.set('n', 'vv', "<C-w>v", {})
+
+require('nvim-tmux-navigation').setup {
+	disable_when_zoomed = true, -- defaults to false
+	keybindings = {
+		left = "<C-h>",
+		down = "<C-j>",
+		up = "<C-k>",
+		right = "<C-l>",
+		last_active = "<C-\\>",
+		next = "<C-Space>",
+	}
+}

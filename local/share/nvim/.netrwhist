@@ -1,7 +1,12 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =5
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/home/yellow/work/rucli/.cache'
+let g:netrw_dirhist_0='/home/yellow/work/cobra_flexbuild_lsdk/packages/apps/networking'
+let g:netrw_dirhist_9='/home/yellow/work/cobra_flexbuild_lsdk/packages/apps/mplane/packages/libyang'
+let g:netrw_dirhist_8='/home/yellow/work/cobra_flexbuild_lsdk/packages/apps/mplane/packages/libssh'
+let g:netrw_dirhist_7='/home/yellow/work/cobra_flexbuild_lsdk/components/apps/networking/dpdk/examples'
+let g:netrw_dirhist_6='/home/yellow/work/cobra_flexbuild_lsdk/components/apps/networking/dpdk/examples/l2fwd'
 let g:netrw_dirhist_5='/home/yellow/project/abdn-flexbuild/packages/firmware/dash-uboot/board/freescale/ls1046acobrardb'
 let g:netrw_dirhist_4='/home/yellow/project/abdn-flexbuild'
 let g:netrw_dirhist_3='/home/yellow/project/abdn-flexbuild/configs'
 let g:netrw_dirhist_2='/home/yellow/project/abdn-flexbuild/packages/apps'
-let g:netrw_dirhist_1='/home/yellow/project/abdn-flexbuild/configs/board/ls1046acobrardb'

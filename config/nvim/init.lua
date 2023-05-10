@@ -67,13 +67,15 @@ require("packer").startup(function(use)
   use("tpope/vim-fugitive")
 
   -- Some color scheme other then default
-  -- use("arcticicestudio/nord-vim")
-  -- use("NLKNguyen/papercolor-theme")
+  use("arcticicestudio/nord-vim")
+  use("NLKNguyen/papercolor-theme")
   -- use({"itchyny/lightline.vim", colorscheme = 'PaperColor'})
-  -- use("folke/tokyonight.nvim")
-  -- use('olimorris/onedarkpro.nvim')
-  -- use('sainnhe/everforest')
+  use("folke/tokyonight.nvim")
+  use('olimorris/onedarkpro.nvim')
+  use('sainnhe/everforest')
   use('rebelot/kanagawa.nvim')
+  use('sainnhe/gruvbox-material')
+  use('marko-cerovac/material.nvim')
   use({'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true },
   })
@@ -92,6 +94,8 @@ require("packer").startup(function(use)
 --	  }
 --	  end }
   use('alexghergh/nvim-tmux-navigation')
+  use('vivien/vim-linux-coding-style')
+  use('Vimjas/vim-python-pep8-indent')
 end)
 
 -- the first run will install packer and our plugins
@@ -100,18 +104,24 @@ if packer_bootstrap then
   return
 end
 
+vim.o.termguicolors = true
+
 -- vim.cmd([[ colorscheme PaperColor ]])
--- vim.cmd[[colorscheme tokyonight-moon]]
+-- vim.cmd[[colorscheme tokyonight-night]]
 -- vim.cmd[[colorscheme onedark]]
 -- vim.cmd[[colorscheme everforest]]
-vim.cmd[[colorscheme kanagawa]]
+--vim.cmd[[colorscheme kanagawa]]
+--vim.g.material_style = "deep ocean"
+--vim.cmd[[colorscheme material]]
+vim.cmd("colorscheme kanagawa")
 
 require("lualine").setup({
   --{ theme = 'PaperColor' },
-  --{ theme = 'tokyonight-moon' },
+  -- { theme = 'tokyonight-night' },
   -- { theme = 'onedark' },
   -- { theme = 'everforest' },
   { theme = 'kanagawa' },
+  --{ theme = 'material' },
 })
 
 
@@ -190,7 +200,10 @@ local opts = {
 }
 
 require("rust-tools").setup(opts)
-require("lspconfig").clangd.setup{}
+require("lspconfig").clangd.setup{
+	on_attach = on_attach,
+}
+-- require("lspconfig").pylyzer.setup{}
 
 -- Setup Completion
 -- See https://github.com/hrsh7th/nvim-cmp#basic-configuration

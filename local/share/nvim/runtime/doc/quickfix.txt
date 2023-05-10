@@ -353,8 +353,6 @@ processing a quickfix or location list command, it will be aborted.
 			If numbers [from] and/or [to] are given, the respective
 			range of errors is listed.  A negative number counts
 			from the last error backwards, -1 being the last error.
-			The 'switchbuf' settings are respected when jumping
-			to a buffer.
 			The |:filter| command can be used to display only the
 			quickfix entries matching a supplied pattern. The
 			pattern is matched against the filename, module name,
@@ -1265,7 +1263,7 @@ The .NET CLI compiler outputs both errors and warnings by default. The output
 may be limited to include only errors, by setting the g:dotnet_errors_only
 variable to |v:true|.
 
-The associated project name is included in each error and warning. To supress
+The associated project name is included in each error and warning. To suppress
 the project name, set the g:dotnet_show_project_file variable to |v:false|.
 
 Example: limit output to only display errors, and suppress the project name: >
@@ -1585,8 +1583,9 @@ A call of |:clist| writes them accordingly with their correct filenames:
 
 Unlike the other prefixes that all match against whole lines, %P, %Q and %O
 can be used to match several patterns in the same line.  Thus it is possible
-to parse even nested files like in the following line:
+to parse even nested files like in the following line: >
   {"file1" {"file2" error1} error2 {"file3" error3 {"file4" error4 error5}}}
+<
 The %O then parses over strings that do not contain any push/pop file name
 information.  See |errorformat-LaTeX| for an extended example.
 
@@ -1946,9 +1945,9 @@ by Vim.
 
 The default format for the lines displayed in the quickfix window and location
 list window is:
-
+>
     <filename>|<lnum> col <col>|<text>
-
+<
 The values displayed in each line correspond to the "bufnr", "lnum", "col" and
 "text" fields returned by the |getqflist()| function.
 

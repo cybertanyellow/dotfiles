@@ -1,7 +1,7 @@
 " These commands create the option window.
 "
 " Maintainer:	Bram Moolenaar <Bram@vim.org>
-" Last Change:	2022 Nov 23
+" Last Change:	2022 Dec 16
 
 " If there already is an option window, jump to that one.
 let buf = bufnr('option-window')
@@ -452,6 +452,9 @@ call <SID>Header(gettext("multiple windows"))
 call <SID>AddOption("laststatus", gettext("0, 1, 2 or 3; when to use a status line for the last window"))
 call append("$", " \tset ls=" . &ls)
 if has("statusline")
+  call <SID>AddOption("statuscolumn", gettext("custom format for the status column"))
+  call append("$", "\t" .. s:local_to_window)
+  call <SID>OptionG("stc", &stc)
   call <SID>AddOption("statusline", gettext("alternate format to be used for a status line"))
   call <SID>OptionG("stl", &stl)
 endif
@@ -627,39 +630,17 @@ if has("gui")
   endif
 endif
 
-if has("printer")
-  call <SID>Header(gettext("printing"))
-  call <SID>AddOption("printoptions", gettext("list of items that control the format of :hardcopy output"))
-  call <SID>OptionG("popt", &popt)
-  call <SID>AddOption("printdevice", gettext("name of the printer to be used for :hardcopy"))
-  call <SID>OptionG("pdev", &pdev)
-  if has("postscript")
-    call <SID>AddOption("printexpr", gettext("expression used to print the PostScript file for :hardcopy"))
-    call <SID>OptionG("pexpr", &pexpr)
-  endif
-  call <SID>AddOption("printfont", gettext("name of the font to be used for :hardcopy"))
-  call <SID>OptionG("pfn", &pfn)
-  call <SID>AddOption("printheader", gettext("format of the header used for :hardcopy"))
-  call <SID>OptionG("pheader", &pheader)
-  if has("postscript")
-    call <SID>AddOption("printencoding", gettext("encoding used to print the PostScript file for :hardcopy"))
-    call <SID>OptionG("penc", &penc)
-  endif
-  call <SID>AddOption("printmbcharset", gettext("the CJK character set to be used for CJK output from :hardcopy"))
-  call <SID>OptionG("pmbcs", &pmbcs)
-  call <SID>AddOption("printmbfont", gettext("list of font names to be used for CJK output from :hardcopy"))
-  call <SID>OptionG("pmbfn", &pmbfn)
-endif
-
 call <SID>Header(gettext("messages and info"))
 call <SID>AddOption("terse", gettext("add 's' flag in 'shortmess' (don't show search message)"))
 call <SID>BinOptionG("terse", &terse)
 call <SID>AddOption("shortmess", gettext("list of flags to make messages shorter"))
 call <SID>OptionG("shm", &shm)
-call <SID>AddOption("showcmd", gettext("show (partial) command keys in the status line"))
+call <SID>AddOption("showcmd", gettext("show (partial) command keys in location given by 'showcmdloc'"))
 let &sc = s:old_sc
 call <SID>BinOptionG("sc", &sc)
 set nosc
+call <SID>AddOption("showcmdloc", gettext("location where to show the (partial) command keys for 'showcmd'"))
+  call <SID>OptionG("sloc", &sloc)
 call <SID>AddOption("showmode", gettext("display the current mode in the status line"))
 call <SID>BinOptionG("smd", &smd)
 call <SID>AddOption("ruler", gettext("show cursor position below each window"))

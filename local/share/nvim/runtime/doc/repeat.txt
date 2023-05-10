@@ -211,12 +211,10 @@ For writing a Vim script, see chapter 41 of the user manual |usr_41.txt|.
 			When [!] is included, all found files are sourced.
 			Else only the first found file is sourced.
 
-			When [where] is omitted, first 'runtimepath' is
-			searched, then directories under "start" in 'packpath'
-			are searched.
+			When [where] is omitted only 'runtimepath' is used.
 			Other values:
 				START	search only under "start" in 'packpath'
-				OPT 	search only under "opt" in 'packpath'
+				OPT	search only under "opt" in 'packpath'
 				PACK	search under "start" and "opt" in
 					'packpath'
 				ALL	first use 'runtimepath', then search
@@ -643,15 +641,15 @@ up-to-date easily, but it requires a program like "git" to be available.
 You can do both, github can automatically create an archive for a release.
 
 Your directory layout would be like this:
-   start/foobar/plugin/foo.vim    	" always loaded, defines commands
-   start/foobar/plugin/bar.vim    	" always loaded, defines commands
-   start/foobar/autoload/foo.vim  	" loaded when foo command used
-   start/foobar/doc/foo.txt       	" help for foo.vim
-   start/foobar/doc/tags          	" help tags
-   opt/fooextra/plugin/extra.vim  	" optional plugin, defines commands
-   opt/fooextra/autoload/extra.vim  	" loaded when extra command used
-   opt/fooextra/doc/extra.txt  	        " help for extra.vim
-   opt/fooextra/doc/tags  	        " help tags
+   start/foobar/plugin/foo.vim		" always loaded, defines commands
+   start/foobar/plugin/bar.vim		" always loaded, defines commands
+   start/foobar/autoload/foo.vim	" loaded when foo command used
+   start/foobar/doc/foo.txt		" help for foo.vim
+   start/foobar/doc/tags		" help tags
+   opt/fooextra/plugin/extra.vim	" optional plugin, defines commands
+   opt/fooextra/autoload/extra.vim	" loaded when extra command used
+   opt/fooextra/doc/extra.txt		" help for extra.vim
+   opt/fooextra/doc/tags		" help tags
 
 This allows for the user to do: >
 	mkdir ~/.local/share/nvim/site/pack

@@ -252,19 +252,6 @@ local function get_bufnr(bufnr)
 end
 
 ---@private
-local function is_disabled(namespace, bufnr)
-  local ns = M.get_namespace(namespace)
-  if ns.disabled then
-    return true
-  end
-
-  if type(diagnostic_disabled[bufnr]) == 'table' then
-    return diagnostic_disabled[bufnr][namespace]
-  end
-  return diagnostic_disabled[bufnr]
-end
-
----@private
 local function diagnostic_lines(diagnostics)
   if not diagnostics then
     return {}
@@ -429,32 +416,31 @@ local function get_diagnostics(bufnr, opts, clamp)
     end
   end
 
+  ---@private
+  local function add_all_diags(buf, diags)
+    for _, diagnostic in pairs(diags) do
+      add(buf, diagnostic)
+    end
+  end
+
   if namespace == nil and bufnr == nil then
     for b, t in pairs(diagnostic_cache) do
       for _, v in pairs(t) do
-        for _, diagnostic in pairs(v) do
-          add(b, diagnostic)
-        end
+        add_all_diags(b, v)
       end
     end
   elseif namespace == nil then
     bufnr = get_bufnr(bufnr)
     for iter_namespace in pairs(diagnostic_cache[bufnr]) do
-      for _, diagnostic in pairs(diagnostic_cache[bufnr][iter_namespace]) do
-        add(bufnr, diagnostic)
-      end
+      add_all_diags(bufnr, diagnostic_cache[bufnr][iter_namespace])
     end
   elseif bufnr == nil then
     for b, t in pairs(diagnostic_cache) do
-      for _, diagnostic in pairs(t[namespace] or {}) do
-        add(b, diagnostic)
-      end
+      add_all_diags(b, t[namespace] or {})
     end
   else
     bufnr = get_bufnr(bufnr)
-    for _, diagnostic in pairs(diagnostic_cache[bufnr][namespace] or {}) do
-      add(bufnr, diagnostic)
-    end
+    add_all_diags(bufnr, diagnostic_cache[bufnr][namespace] or {})
   end
 
   if opts.severity then
@@ -484,7 +470,7 @@ local function set_list(loclist, opts)
     vim.fn.setqflist({}, ' ', { title = title, items = items })
   end
   if open then
-    api.nvim_command(loclist and 'lopen' or 'botright copen')
+    api.nvim_command(loclist and 'lwindow' or 'botright cwindow')
   end
 end
 
@@ -922,7 +908,7 @@ M.handlers.signs = {
   end,
   hide = function(namespace, bufnr)
     local ns = M.get_namespace(namespace)
-    if ns.user_data.sign_group then
+    if ns.user_data.sign_group and api.nvim_buf_is_valid(bufnr) then
       vim.fn.sign_unplace(ns.user_data.sign_group, { buffer = bufnr })
     end
   end,
@@ -977,7 +963,9 @@ M.handlers.underline = {
     local ns = M.get_namespace(namespace)
     if ns.user_data.underline_ns then
       diagnostic_cache_extmarks[bufnr][ns.user_data.underline_ns] = {}
-      api.nvim_buf_clear_namespace(bufnr, ns.user_data.underline_ns, 0, -1)
+      if api.nvim_buf_is_valid(bufnr) then
+        api.nvim_buf_clear_namespace(bufnr, ns.user_data.underline_ns, 0, -1)
+      end
     end
   end,
 }
@@ -1040,7 +1028,9 @@ M.handlers.virtual_text = {
     local ns = M.get_namespace(namespace)
     if ns.user_data.virt_text_ns then
       diagnostic_cache_extmarks[bufnr][ns.user_data.virt_text_ns] = {}
-      api.nvim_buf_clear_namespace(bufnr, ns.user_data.virt_text_ns, 0, -1)
+      if api.nvim_buf_is_valid(bufnr) then
+        api.nvim_buf_clear_namespace(bufnr, ns.user_data.virt_text_ns, 0, -1)
+      end
     end
   end,
 }
@@ -1116,6 +1106,27 @@ function M.hide(namespace, bufnr)
   end
 end
 
+--- Check whether diagnostics are disabled in a given buffer.
+---
+---@param bufnr number|nil Buffer number, or 0 for current buffer.
+---@param namespace number|nil Diagnostic namespace. When omitted, checks if
+---                            all diagnostics are disabled in {bufnr}.
+---                            Otherwise, only checks if diagnostics from
+---                            {namespace} are disabled.
+---@return boolean
+function M.is_disabled(bufnr, namespace)
+  bufnr = get_bufnr(bufnr)
+  if namespace and M.get_namespace(namespace).disabled then
+    return true
+  end
+
+  if type(diagnostic_disabled[bufnr]) == 'table' then
+    return diagnostic_disabled[bufnr][namespace]
+  end
+
+  return diagnostic_disabled[bufnr] ~= nil
+end
+
 --- Display diagnostics for the given namespace and buffer.
 ---
 ---@param namespace number|nil Diagnostic namespace. When omitted, show
@@ -1159,7 +1170,7 @@ function M.show(namespace, bufnr, diagnostics, opts)
     return
   end
 
-  if is_disabled(namespace, bufnr) then
+  if M.is_disabled(bufnr, namespace) then
     return
   end
 
@@ -1470,11 +1481,15 @@ function M.reset(namespace, bufnr)
       M.hide(iter_namespace, iter_bufnr)
     end
 
-    api.nvim_exec_autocmds('DiagnosticChanged', {
-      modeline = false,
-      buffer = iter_bufnr,
-      data = { diagnostics = {} },
-    })
+    if api.nvim_buf_is_valid(iter_bufnr) then
+      api.nvim_exec_autocmds('DiagnosticChanged', {
+        modeline = false,
+        buffer = iter_bufnr,
+        data = { diagnostics = {} },
+      })
+    else
+      diagnostic_cache[iter_bufnr] = nil
+    end
   end
 end
 
@@ -1665,7 +1680,11 @@ function M.toqflist(diagnostics)
   end
   table.sort(list, function(a, b)
     if a.bufnr == b.bufnr then
-      return a.lnum < b.lnum
+      if a.lnum == b.lnum then
+        return a.col < b.col
+      else
+        return a.lnum < b.lnum
+      end
     else
       return a.bufnr < b.bufnr
     end

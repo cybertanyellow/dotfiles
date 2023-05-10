@@ -190,6 +190,8 @@ local extension = {
   BUILD = 'bzl',
   qc = 'c',
   cabal = 'cabal',
+  capnp = 'capnp',
+  cdc = 'cdc',
   cdl = 'cdl',
   toc = 'cdrtoc',
   cfc = 'cf',
@@ -225,6 +227,7 @@ local extension = {
   hook = function(path, bufnr)
     return M.getlines(bufnr, 1) == '[Trigger]' and 'conf'
   end,
+  nmconnection = 'confini',
   mklx = 'context',
   mkiv = 'context',
   mkii = 'context',
@@ -327,13 +330,10 @@ local extension = {
   end,
   eex = 'eelixir',
   leex = 'eelixir',
-  am = function(path, bufnr)
-    if not path:lower():find('makefile%.am$') then
-      return 'elf'
-    end
-  end,
+  am = 'elf',
   exs = 'elixir',
   elm = 'elm',
+  lc = 'elsa',
   elv = 'elvish',
   ent = function(path, bufnr)
     return require('vim.filetype.detect').ent(bufnr)
@@ -386,6 +386,7 @@ local extension = {
   ['m4gl'] = 'fgl',
   ['4gl'] = 'fgl',
   ['4gh'] = 'fgl',
+  fir = 'firrtl',
   fish = 'fish',
   focexec = 'focexec',
   fex = 'focexec',
@@ -419,8 +420,10 @@ local extension = {
   fs = function(path, bufnr)
     return require('vim.filetype.detect').fs(bufnr)
   end,
+  fsh = 'fsh',
   fsi = 'fsharp',
   fsx = 'fsharp',
+  fc = 'func',
   fusion = 'fusion',
   gdb = 'gdb',
   gdmo = 'gdmo',
@@ -556,6 +559,7 @@ local extension = {
   jov = 'jovial',
   jovial = 'jovial',
   properties = 'jproperties',
+  jq = 'jq',
   slnf = 'json',
   json = 'json',
   jsonp = 'json',
@@ -568,6 +572,7 @@ local extension = {
   libsonnet = 'jsonnet',
   jsp = 'jsp',
   jl = 'julia',
+  kdl = 'kdl',
   kv = 'kivy',
   kix = 'kix',
   kts = 'kotlin',
@@ -687,6 +692,7 @@ local extension = {
   isc = 'monk',
   moo = 'moo',
   moon = 'moonscript',
+  move = 'move',
   mp = 'mp',
   mpiv = function(path, bufnr)
     return 'mp', function(b)
@@ -804,6 +810,7 @@ local extension = {
   pdb = 'prolog',
   pml = 'promela',
   proto = 'proto',
+  prql = 'prql',
   ['psd1'] = 'ps1',
   ['psm1'] = 'ps1',
   ['ps1'] = 'ps1',
@@ -867,6 +874,7 @@ local extension = {
   Snw = 'rnoweb',
   robot = 'robot',
   resource = 'robot',
+  ron = 'ron',
   rsc = 'routeros',
   x = 'rpcgen',
   rpl = 'rpl',
@@ -947,12 +955,14 @@ local extension = {
   ice = 'slice',
   score = 'slrnsc',
   sol = 'solidity',
+  smali = 'smali',
   tpl = 'smarty',
   ihlp = 'smcl',
   smcl = 'smcl',
   hlp = 'smcl',
   smith = 'smith',
   smt = 'smith',
+  smithy = 'smithy',
   sml = 'sml',
   spt = 'snobol4',
   sno = 'snobol4',
@@ -1021,6 +1031,7 @@ local extension = {
   texinfo = 'texinfo',
   text = 'text',
   tfvars = 'terraform-vars',
+  thrift = 'thrift',
   tla = 'tla',
   tli = 'tli',
   toml = 'toml',
@@ -1321,6 +1332,7 @@ local filename = {
   ['GNUmakefile.am'] = 'automake',
   ['named.root'] = 'bindzone',
   WORKSPACE = 'bzl',
+  ['WORKSPACE.bzlmod'] = 'bzl',
   BUILD = 'bzl',
   ['cabal.project'] = 'cabalproject',
   ['cabal.config'] = 'cabalconfig',
@@ -1376,13 +1388,13 @@ local filename = {
   npmrc = 'dosini',
   ['/etc/yum.conf'] = 'dosini',
   ['.npmrc'] = 'dosini',
-  ['.editorconfig'] = 'dosini',
   ['/etc/pacman.conf'] = 'confini',
   ['mpv.conf'] = 'confini',
   dune = 'dune',
   jbuild = 'dune',
   ['dune-workspace'] = 'dune',
   ['dune-project'] = 'dune',
+  ['.editorconfig'] = 'editorconfig',
   ['elinks.conf'] = 'elinks',
   ['mix.lock'] = 'elixir',
   ['filter-rules'] = 'elmfilt',
@@ -1425,6 +1437,8 @@ local filename = {
   gnashpluginrc = 'gnash',
   gnashrc = 'gnash',
   ['.gnuplot'] = 'gnuplot',
+  ['go.sum'] = 'gosum',
+  ['go.work.sum'] = 'gosum',
   ['go.work'] = 'gowork',
   ['.gprc'] = 'gp',
   ['/.gnupg/gpg.conf'] = 'gpg',
@@ -1454,11 +1468,16 @@ local filename = {
   ['ipf.conf'] = 'ipfilter',
   ['ipf6.conf'] = 'ipfilter',
   ['ipf.rules'] = 'ipfilter',
-  ['.eslintrc'] = 'json',
-  ['.babelrc'] = 'json',
   ['Pipfile.lock'] = 'json',
   ['.firebaserc'] = 'json',
   ['.prettierrc'] = 'json',
+  ['.stylelintrc'] = 'json',
+  ['.babelrc'] = 'jsonc',
+  ['.eslintrc'] = 'jsonc',
+  ['.hintrc'] = 'jsonc',
+  ['.jsfmtrc'] = 'jsonc',
+  ['.jshintrc'] = 'jsonc',
+  ['.swrc'] = 'jsonc',
   Kconfig = 'kconfig',
   ['Kconfig.debug'] = 'kconfig',
   ['lftp.conf'] = 'lftp',
@@ -1526,6 +1545,7 @@ local filename = {
   ['.latexmkrc'] = 'perl',
   ['pf.conf'] = 'pf',
   ['main.cf'] = 'pfmain',
+  ['main.cf.proto'] = 'pfmain',
   pinerc = 'pine',
   ['.pinercex'] = 'pine',
   ['.pinerc'] = 'pine',
@@ -1687,6 +1707,7 @@ local filename = {
   fglrxrc = 'xml',
   ['/etc/blkid.tab'] = 'xml',
   ['/etc/blkid.tab.old'] = 'xml',
+  ['.clangd'] = 'yaml',
   ['.clang-format'] = 'yaml',
   ['.clang-tidy'] = 'yaml',
   ['/etc/zprofile'] = 'zsh',
@@ -1912,6 +1933,7 @@ local pattern = {
   ['.*%.properties_.._..'] = 'jproperties',
   ['org%.eclipse%..*%.prefs'] = 'jproperties',
   ['.*%.properties_.._.._.*'] = starsetf('jproperties'),
+  ['[jt]sconfig.*%.json'] = 'jsonc',
   ['Kconfig%..*'] = starsetf('kconfig'),
   ['.*%.[Ss][Uu][Bb]'] = 'krl',
   ['lilo%.conf.*'] = starsetf('lilo'),
@@ -2428,6 +2450,7 @@ local function match_pattern(name, path, tail, pat)
       return false
     end
   end
+
   -- If the pattern contains a / match against the full path, otherwise just the tail
   local fullpat = '^' .. pat .. '$'
   local matches
@@ -2505,64 +2528,64 @@ function M.match(args)
     name = api.nvim_buf_get_name(bufnr)
   end
 
-  if name then
-    name = normalize_path(name)
-  end
-
   local ft, on_detect
 
-  -- First check for the simple case where the full path exists as a key
-  local path = vim.fn.fnamemodify(name, ':p')
-  ft, on_detect = dispatch(filename[path], path, bufnr)
-  if ft then
-    return ft, on_detect
-  end
+  if name then
+    name = normalize_path(name)
 
-  -- Next check against just the file name
-  local tail = vim.fn.fnamemodify(name, ':t')
-  ft, on_detect = dispatch(filename[tail], path, bufnr)
-  if ft then
-    return ft, on_detect
-  end
-
-  -- Next, check the file path against available patterns with non-negative priority
-  local j = 1
-  for i, v in ipairs(pattern_sorted) do
-    local k = next(v)
-    local opts = v[k][2]
-    if opts.priority < 0 then
-      j = i
-      break
+    -- First check for the simple case where the full path exists as a key
+    local path = vim.fn.fnamemodify(name, ':p')
+    ft, on_detect = dispatch(filename[path], path, bufnr)
+    if ft then
+      return ft, on_detect
     end
 
-    local filetype = v[k][1]
-    local matches = match_pattern(name, path, tail, k)
-    if matches then
-      ft, on_detect = dispatch(filetype, path, bufnr, matches)
-      if ft then
-        return ft, on_detect
+    -- Next check against just the file name
+    local tail = vim.fn.fnamemodify(name, ':t')
+    ft, on_detect = dispatch(filename[tail], path, bufnr)
+    if ft then
+      return ft, on_detect
+    end
+
+    -- Next, check the file path against available patterns with non-negative priority
+    local j = 1
+    for i, v in ipairs(pattern_sorted) do
+      local k = next(v)
+      local opts = v[k][2]
+      if opts.priority < 0 then
+        j = i
+        break
+      end
+
+      local filetype = v[k][1]
+      local matches = match_pattern(name, path, tail, k)
+      if matches then
+        ft, on_detect = dispatch(filetype, path, bufnr, matches)
+        if ft then
+          return ft, on_detect
+        end
       end
     end
-  end
 
-  -- Next, check file extension
-  local ext = vim.fn.fnamemodify(name, ':e')
-  ft, on_detect = dispatch(extension[ext], path, bufnr)
-  if ft then
-    return ft, on_detect
-  end
+    -- Next, check file extension
+    local ext = vim.fn.fnamemodify(name, ':e')
+    ft, on_detect = dispatch(extension[ext], path, bufnr)
+    if ft then
+      return ft, on_detect
+    end
 
-  -- Next, check patterns with negative priority
-  for i = j, #pattern_sorted do
-    local v = pattern_sorted[i]
-    local k = next(v)
+    -- Next, check patterns with negative priority
+    for i = j, #pattern_sorted do
+      local v = pattern_sorted[i]
+      local k = next(v)
 
-    local filetype = v[k][1]
-    local matches = match_pattern(name, path, tail, k)
-    if matches then
-      ft, on_detect = dispatch(filetype, path, bufnr, matches)
-      if ft then
-        return ft, on_detect
+      local filetype = v[k][1]
+      local matches = match_pattern(name, path, tail, k)
+      if matches then
+        ft, on_detect = dispatch(filetype, path, bufnr, matches)
+        if ft then
+          return ft, on_detect
+        end
       end
     end
   end
@@ -2582,7 +2605,9 @@ function M.match(args)
     -- If the function tries to use the filename that is nil then it will fail,
     -- but this enables checks which do not need a filename to still work.
     local ok
-    ok, ft = pcall(require('vim.filetype.detect').match_contents, contents, name)
+    ok, ft = pcall(require('vim.filetype.detect').match_contents, contents, name, function(ext)
+      return dispatch(extension[ext], name, bufnr)
+    end)
     if ok and ft then
       return ft
     end

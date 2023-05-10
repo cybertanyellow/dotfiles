@@ -897,115 +897,114 @@ end
 --
 --- Starts and initializes a client with the given configuration.
 ---
---- Parameter `cmd` is required.
+--- Field `cmd` in {config} is required.
 ---
---- The following parameters describe fields in the {config} table.
+---@param config (table) Configuration for the server:
+--- - cmd: (table|string|fun(dispatchers: table):table) command string or
+---       list treated like |jobstart()|. The command must launch the language server
+---       process. `cmd` can also be a function that creates an RPC client.
+---       The function receives a dispatchers table and must return a table with the
+---       functions `request`, `notify`, `is_closing` and `terminate`
+---       See |vim.lsp.rpc.request()| and |vim.lsp.rpc.notify()|
+---       For TCP there is a built-in rpc client factory: |vim.lsp.rpc.connect()|
 ---
+--- - cmd_cwd: (string, default=|getcwd()|) Directory to launch
+---       the `cmd` process. Not related to `root_dir`.
 ---
----@param cmd: (table|string|fun(dispatchers: table):table) command string or
---- list treated like |jobstart()|. The command must launch the language server
---- process. `cmd` can also be a function that creates an RPC client.
---- The function receives a dispatchers table and must return a table with the
---- functions `request`, `notify`, `is_closing` and `terminate`
---- See |vim.lsp.rpc.request()| and |vim.lsp.rpc.notify()|
---- For TCP there is a built-in rpc client factory: |vim.lsp.rpc.connect()|
+--- - cmd_env: (table) Environment flags to pass to the LSP on
+---       spawn.  Can be specified using keys like a map or as a list with `k=v`
+---       pairs or both. Non-string values are coerced to string.
+---       Example:
+---       <pre>
+---                   { "PRODUCTION=true"; "TEST=123"; PORT = 8080; HOST = "0.0.0.0"; }
+---       </pre>
 ---
----@param cmd_cwd: (string, default=|getcwd()|) Directory to launch
---- the `cmd` process. Not related to `root_dir`.
+--- - detached: (boolean, default true) Daemonize the server process so that it runs in a
+---       separate process group from Nvim. Nvim will shutdown the process on exit, but if Nvim fails to
+---       exit cleanly this could leave behind orphaned server processes.
 ---
----@param cmd_env: (table) Environment flags to pass to the LSP on
---- spawn.  Can be specified using keys like a map or as a list with `k=v`
---- pairs or both. Non-string values are coerced to string.
---- Example:
---- <pre>
---- { "PRODUCTION=true"; "TEST=123"; PORT = 8080; HOST = "0.0.0.0"; }
---- </pre>
+--- - workspace_folders: (table) List of workspace folders passed to the
+---       language server. For backwards compatibility rootUri and rootPath will be
+---       derived from the first workspace folder in this list. See `workspaceFolders` in
+---       the LSP spec.
 ---
----@param detached: (boolean, default true) Daemonize the server process so that it runs in a
---- separate process group from Nvim. Nvim will shutdown the process on exit, but if Nvim fails to
---- exit cleanly this could leave behind orphaned server processes.
+--- - capabilities: Map overriding the default capabilities defined by
+---       |vim.lsp.protocol.make_client_capabilities()|, passed to the language
+---       server on initialization. Hint: use make_client_capabilities() and modify
+---       its result.
+---       - Note: To send an empty dictionary use
+---         `{[vim.type_idx]=vim.types.dictionary}`, else it will be encoded as an
+---         array.
 ---
----@param workspace_folders (table) List of workspace folders passed to the
---- language server. For backwards compatibility rootUri and rootPath will be
---- derived from the first workspace folder in this list. See `workspaceFolders` in
---- the LSP spec.
+--- - handlers: Map of language server method names to |lsp-handler|
 ---
----@param capabilities Map overriding the default capabilities defined by
---- |vim.lsp.protocol.make_client_capabilities()|, passed to the language
---- server on initialization. Hint: use make_client_capabilities() and modify
---- its result.
---- - Note: To send an empty dictionary use
----   `{[vim.type_idx]=vim.types.dictionary}`, else it will be encoded as an
----   array.
+--- - settings: Map with language server specific settings. These are
+---       returned to the language server if requested via `workspace/configuration`.
+---       Keys are case-sensitive.
 ---
----@param handlers Map of language server method names to |lsp-handler|
+--- - commands: table Table that maps string of clientside commands to user-defined functions.
+---       Commands passed to start_client take precedence over the global command registry. Each key
+---       must be a unique command name, and the value is a function which is called if any LSP action
+---       (code action, code lenses, ...) triggers the command.
 ---
----@param settings Map with language server specific settings. These are
---- returned to the language server if requested via `workspace/configuration`.
---- Keys are case-sensitive.
+--- - init_options Values to pass in the initialization request
+---       as `initializationOptions`. See `initialize` in the LSP spec.
 ---
----@param commands table Table that maps string of clientside commands to user-defined functions.
---- Commands passed to start_client take precedence over the global command registry. Each key
---- must be a unique command name, and the value is a function which is called if any LSP action
---- (code action, code lenses, ...) triggers the command.
+--- - name: (string, default=client-id) Name in log messages.
 ---
----@param init_options Values to pass in the initialization request
---- as `initializationOptions`. See `initialize` in the LSP spec.
+--- - get_language_id: function(bufnr, filetype) -> language ID as string.
+---       Defaults to the filetype.
 ---
----@param name (string, default=client-id) Name in log messages.
+--- - offset_encoding: (default="utf-16") One of "utf-8", "utf-16",
+---       or "utf-32" which is the encoding that the LSP server expects. Client does
+---       not verify this is correct.
 ---
----@param get_language_id function(bufnr, filetype) -> language ID as string.
---- Defaults to the filetype.
+--- - on_error: Callback with parameters (code, ...), invoked
+---       when the client operation throws an error. `code` is a number describing
+---       the error. Other arguments may be passed depending on the error kind.  See
+---       `vim.lsp.rpc.client_errors` for possible errors.
+---       Use `vim.lsp.rpc.client_errors[code]` to get human-friendly name.
 ---
----@param offset_encoding (default="utf-16") One of "utf-8", "utf-16",
---- or "utf-32" which is the encoding that the LSP server expects. Client does
---- not verify this is correct.
+--- - before_init: Callback with parameters (initialize_params, config)
+---       invoked before the LSP "initialize" phase, where `params` contains the
+---       parameters being sent to the server and `config` is the config that was
+---       passed to |vim.lsp.start_client()|. You can use this to modify parameters before
+---       they are sent.
 ---
----@param on_error Callback with parameters (code, ...), invoked
---- when the client operation throws an error. `code` is a number describing
---- the error. Other arguments may be passed depending on the error kind.  See
---- `vim.lsp.rpc.client_errors` for possible errors.
---- Use `vim.lsp.rpc.client_errors[code]` to get human-friendly name.
+--- - on_init: Callback (client, initialize_result) invoked after LSP
+---       "initialize", where `result` is a table of `capabilities` and anything else
+---       the server may send. For example, clangd sends
+---       `initialize_result.offsetEncoding` if `capabilities.offsetEncoding` was
+---       sent to it. You can only modify the `client.offset_encoding` here before
+---       any notifications are sent. Most language servers expect to be sent client specified settings after
+---       initialization. Neovim does not make this assumption. A
+---       `workspace/didChangeConfiguration` notification should be sent
+---        to the server during on_init.
 ---
----@param before_init Callback with parameters (initialize_params, config)
---- invoked before the LSP "initialize" phase, where `params` contains the
---- parameters being sent to the server and `config` is the config that was
---- passed to |vim.lsp.start_client()|. You can use this to modify parameters before
---- they are sent.
----
----@param on_init Callback (client, initialize_result) invoked after LSP
---- "initialize", where `result` is a table of `capabilities` and anything else
---- the server may send. For example, clangd sends
---- `initialize_result.offsetEncoding` if `capabilities.offsetEncoding` was
---- sent to it. You can only modify the `client.offset_encoding` here before
---- any notifications are sent. Most language servers expect to be sent client specified settings after
---- initialization. Neovim does not make this assumption. A
---- `workspace/didChangeConfiguration` notification should be sent
----  to the server during on_init.
----
----@param on_exit Callback (code, signal, client_id) invoked on client
+--- - on_exit Callback (code, signal, client_id) invoked on client
 --- exit.
---- - code: exit code of the process
---- - signal: number describing the signal used to terminate (if any)
---- - client_id: client handle
+---       - code: exit code of the process
+---       - signal: number describing the signal used to terminate (if any)
+---       - client_id: client handle
 ---
----@param on_attach Callback (client, bufnr) invoked when client
---- attaches to a buffer.
+--- - on_attach: Callback (client, bufnr) invoked when client
+---       attaches to a buffer.
 ---
----@param trace:  "off" | "messages" | "verbose" | nil passed directly to the language
---- server in the initialize request. Invalid/empty values will default to "off"
----@param flags: A table with flags for the client. The current (experimental) flags are:
---- - allow_incremental_sync (bool, default true): Allow using incremental sync for buffer edits
---- - debounce_text_changes (number, default 150): Debounce didChange
----       notifications to the server by the given number in milliseconds. No debounce
----       occurs if nil
---- - exit_timeout (number|boolean, default false): Milliseconds to wait for server to
----       exit cleanly after sending the "shutdown" request before sending kill -15.
----       If set to false, nvim exits immediately after sending the "shutdown" request to the server.
+--- - trace: ("off" | "messages" | "verbose" | nil) passed directly to the language
+---       server in the initialize request. Invalid/empty values will default to "off"
 ---
----@param root_dir string Directory where the LSP
---- server will base its workspaceFolders, rootUri, and rootPath
---- on initialization.
+--- - flags: A table with flags for the client. The current (experimental) flags are:
+---       - allow_incremental_sync (bool, default true): Allow using incremental sync for buffer edits
+---       - debounce_text_changes (number, default 150): Debounce didChange
+---             notifications to the server by the given number in milliseconds. No debounce
+---             occurs if nil
+---       - exit_timeout (number|boolean, default false): Milliseconds to wait for server to
+---             exit cleanly after sending the "shutdown" request before sending kill -15.
+---             If set to false, nvim exits immediately after sending the "shutdown" request to the server.
+---
+--- - root_dir: (string) Directory where the LSP
+---       server will base its workspaceFolders, rootUri, and rootPath
+---       on initialization.
 ---
 ---@returns Client id. |vim.lsp.get_client_by_id()| Note: client may not be
 --- fully initialized. Use `on_init` to do any actions once
@@ -1557,15 +1556,21 @@ end
 --- Notify all attached clients that a buffer has changed.
 local text_document_did_change_handler
 do
-  text_document_did_change_handler =
-    function(_, bufnr, changedtick, firstline, lastline, new_lastline)
-      -- Detach (nvim_buf_attach) via returning True to on_lines if no clients are attached
-      if tbl_isempty(all_buffer_active_clients[bufnr] or {}) then
-        return true
-      end
-      util.buf_versions[bufnr] = changedtick
-      changetracking.send_changes(bufnr, firstline, lastline, new_lastline)
+  text_document_did_change_handler = function(
+    _,
+    bufnr,
+    changedtick,
+    firstline,
+    lastline,
+    new_lastline
+  )
+    -- Detach (nvim_buf_attach) via returning True to on_lines if no clients are attached
+    if tbl_isempty(all_buffer_active_clients[bufnr] or {}) then
+      return true
     end
+    util.buf_versions[bufnr] = changedtick
+    changetracking.send_changes(bufnr, firstline, lastline, new_lastline)
+  end
 end
 
 ---@private
@@ -1731,8 +1736,8 @@ function lsp.buf_detach_client(bufnr, client_id)
     vim.notify(
       string.format(
         'Buffer (id: %d) is not attached to client (id: %d). Cannot detach.',
-        client_id,
-        bufnr
+        bufnr,
+        client_id
       )
     )
     return
@@ -1805,7 +1810,7 @@ end
 --- already for this client, then force-shutdown is attempted.
 ---
 ---@param client_id number|table id or |vim.lsp.client| object, or list thereof
----@param force boolean (optional) shutdown forcefully
+---@param force boolean|nil shutdown forcefully
 function lsp.stop_client(client_id, force)
   local ids = type(client_id) == 'table' and client_id or { client_id }
   for _, id in ipairs(ids) do
@@ -1822,7 +1827,7 @@ end
 ---@class vim.lsp.get_active_clients.filter
 ---@field id number|nil Match clients by id
 ---@field bufnr number|nil match clients attached to the given buffer
----@field name number|nil match clients by name
+---@field name string|nil match clients by name
 
 --- Get active clients.
 ---
@@ -1845,7 +1850,8 @@ function lsp.get_active_clients(filter)
   for client_id in pairs(t) do
     local client = active_clients[client_id]
     if
-      (filter.id == nil or client.id == filter.id)
+      client
+      and (filter.id == nil or client.id == filter.id)
       and (filter.name == nil or client.name == filter.name)
     then
       clients[#clients + 1] = client
@@ -2047,7 +2053,7 @@ end
 --- Send a notification to a server
 ---@param bufnr (number|nil) The number of the buffer
 ---@param method (string) Name of the request method
----@param params (string) Arguments to send to the server
+---@param params (any) Arguments to send to the server
 ---
 ---@returns true if any client returns true; false otherwise
 function lsp.buf_notify(bufnr, method, params)

@@ -1271,18 +1271,32 @@ When not set 4 is used.
 
 DOSBATCH				*dosbatch.vim* *ft-dosbatch-syntax*
 
-There is one option with highlighting DOS batch files.	This covers new
-extensions to the Command Interpreter introduced with Windows 2000 and
-is controlled by the variable dosbatch_cmdextversion.  For Windows NT
-this should have the value 1, and for Windows 2000 it should be 2.
+Select the set of Windows Command interpreter extensions that should be
+supported with the variable dosbatch_cmdextversion.  For versions of Windows
+NT (before Windows 2000) this should have the value of 1.  For Windows 2000
+and later it should be 2.
 Select the version you want with the following line: >
 
    :let dosbatch_cmdextversion = 1
 
 If this variable is not defined it defaults to a value of 2 to support
-Windows 2000.
+Windows 2000 and later.
 
-A second option covers whether *.btm files should be detected as type
+The original MS-DOS supports an idiom of using a double colon (::) as an
+alternative way to enter a comment line.  This idiom can be used with the
+current Windows Command Interpreter, but it can lead to problems when used
+inside ( ... ) command blocks.  You can find a discussion about this on
+Stack Overflow -
+
+https://stackoverflow.com/questions/12407800/which-comment-style-should-i-use-in-batch-files
+
+To allow the use of the :: idiom for comments in the Windows Command
+Interpreter or working with MS-DOS bat files, set the
+dosbatch_colons_comment variable to anything: >
+
+   :let dosbatch_colons_comment = 1
+
+There is an option that covers whether *.btm files should be detected as type
 "dosbatch" (MS-DOS batch files) or type "btm" (4DOS batch files).  The latter
 is used by default.  You may select the former with the following line: >
 
@@ -2475,7 +2489,7 @@ from the rest of the name (like 'PkgName::' in '$PkgName::VarName'): >
 (In Vim 6.x it was the other way around: "perl_want_scope_in_variables"
 enabled it.)
 
-If you do not want complex things like '@{${"foo"}}' to be parsed: >
+If you do not want complex things like `@{${"foo"}}` to be parsed: >
 
 	:let perl_no_extended_vars = 1
 
@@ -3784,7 +3798,7 @@ SYNTAX ISKEYWORD SETTING				*:syn-iskeyword*
 
 	clear:		Syntax specific iskeyword setting is disabled and the
 			buffer-local 'iskeyword' setting is used.
-	{option}       	Set the syntax 'iskeyword' option to a new value.
+	{option}	Set the syntax 'iskeyword' option to a new value.
 
 	Example: >
   :syntax iskeyword @,48-57,192-255,$,_
@@ -4851,7 +4865,7 @@ Note that the ":syntax" command can be abbreviated to ":sy", although ":syn"
 is mostly used, because it looks better.
 
 ==============================================================================
-12. Highlight command			*:highlight* *:hi* *E28* *E411* *E415*
+13. Highlight command			*:highlight* *:hi* *E28* *E411* *E415*
 
 There are two types of highlight groups:
 - The built-in |highlight-groups|.
@@ -4902,7 +4916,7 @@ in their own color.
 
 						*highlight-clear* *:hi-clear*
 :hi[ghlight] clear	Reset all highlighting to the defaults.  Removes all
-			highlighting for groups added by the user!
+			highlighting for groups added by the user.
 			Uses the current value of 'background' to decide which
 			default colors to use.
 			If there was a default link, restore it. |:hi-link|
@@ -4958,7 +4972,8 @@ the same syntax file on all UIs.
 					*bold* *underline* *undercurl*
 					*underdouble* *underdotted*
 					*underdashed* *inverse* *italic*
-					*standout* *nocombine* *strikethrough*
+					*standout* *strikethrough* *altfont*
+					*nocombine*
 cterm={attr-list}			*attr-list* *highlight-cterm* *E418*
 	attr-list is a comma-separated list (without spaces) of the
 	following items (in any order):
@@ -4973,6 +4988,7 @@ cterm={attr-list}			*attr-list* *highlight-cterm* *E418*
 		inverse		same as reverse
 		italic
 		standout
+		altfont
 		nocombine	override attributes instead of combining them
 		NONE		no attributes used (used to reset it)
 
@@ -5042,7 +5058,7 @@ ctermbg={color-nr}				*ctermbg*
 	a number instead of a color name.
 
 	Note that for 16 color ansi style terminals (including xterms), the
-	numbers in the NR-8 column is used.  Here '*' means 'add 8' so that 
+	numbers in the NR-8 column is used.  Here "*" means "add 8" so that 
 	Blue is 12, DarkGray is 8 etc.
 
 	Note that for some color terminals these names may result in the wrong
@@ -5333,7 +5349,7 @@ Tooltip		Current font, background and foreground of the tooltips.
 		Applicable highlight arguments: font, guibg, guifg.
 
 ==============================================================================
-13. Linking groups		*:hi-link* *:highlight-link* *E412* *E413*
+14. Linking groups		*:hi-link* *:highlight-link* *E412* *E413*
 
 When you want to use the same highlighting for several syntax groups, you
 can do this more easily by linking the groups into one common highlight
@@ -5492,7 +5508,7 @@ is loaded into that window or the file is reloaded.
 When splitting the window, the new window will use the original syntax.
 
 ==============================================================================
-17. Color xterms				*xterm-color* *color-xterm*
+18. Color xterms				*xterm-color* *color-xterm*
 
 							*colortest.vim*
 To test your color setup, a file has been included in the Vim distribution.
@@ -5502,7 +5518,7 @@ To use it, execute this command: >
 Nvim uses 256-color and |true-color| terminal capabilities wherever possible.
 
 ==============================================================================
-18. When syntax is slow						*:syntime*
+19. When syntax is slow						*:syntime*
 
 This is aimed at authors of a syntax file.
 

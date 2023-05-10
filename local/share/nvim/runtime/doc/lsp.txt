@@ -566,7 +566,7 @@ buf_notify({bufnr}, {method}, {params})                 *vim.lsp.buf_notify()*
     Parameters: ~
       • {bufnr}   (number|nil) The number of the buffer
       • {method}  (string) Name of the request method
-      • {params}  (string) Arguments to send to the server
+      • {params}  (any) Arguments to send to the server
 
     Return: ~
         true if any client returns true; false otherwise
@@ -832,128 +832,118 @@ start({config}, {opts})                                      *vim.lsp.start()*
 start_client({config})                                *vim.lsp.start_client()*
     Starts and initializes a client with the given configuration.
 
-    Parameter `cmd` is required.
-
-    The following parameters describe fields in the {config} table.
+    Field `cmd` in {config} is required.
 
     Parameters: ~
-      • {cmd}                (table|string|fun(dispatchers: table):table)
-                             command string or list treated like |jobstart()|.
-                             The command must launch the language server
-                             process. `cmd` can also be a function that
-                             creates an RPC client. The function receives a
-                             dispatchers table and must return a table with
-                             the functions `request`, `notify`, `is_closing`
-                             and `terminate` See |vim.lsp.rpc.request()| and
-                             |vim.lsp.rpc.notify()| For TCP there is a
-                             built-in rpc client factory:
-                             |vim.lsp.rpc.connect()|
-      • {cmd_cwd}            (string, default=|getcwd()|) Directory to launch
-                             the `cmd` process. Not related to `root_dir`.
-      • {cmd_env}            (table) Environment flags to pass to the LSP on
-                             spawn. Can be specified using keys like a map or
-                             as a list with `k=v` pairs or both. Non-string values are coerced to
-                             string. Example: >
+      • {config}  (table) Configuration for the server:
+                  • cmd: (table|string|fun(dispatchers: table):table) command
+                    string or list treated like |jobstart()|. The command must
+                    launch the language server process. `cmd` can also be a
+                    function that creates an RPC client. The function receives
+                    a dispatchers table and must return a table with the
+                    functions `request`, `notify`, `is_closing` and
+                    `terminate` See |vim.lsp.rpc.request()| and
+                    |vim.lsp.rpc.notify()| For TCP there is a built-in rpc
+                    client factory: |vim.lsp.rpc.connect()|
+                  • cmd_cwd: (string, default=|getcwd()|) Directory to launch
+                    the `cmd` process. Not related to `root_dir`.
+                  • cmd_env: (table) Environment flags to pass to the LSP on
+                    spawn. Can be specified using keys like a map or as a list
+                    with `k=v` pairs or both. Non-string values are coerced to string.
+                    Example: >
 
-     { "PRODUCTION=true"; "TEST=123"; PORT = 8080; HOST = "0.0.0.0"; }
+                       { "PRODUCTION=true"; "TEST=123"; PORT = 8080; HOST = "0.0.0.0"; }
 <
-      • {detached}           (boolean, default true) Daemonize the server
-                             process so that it runs in a separate process
-                             group from Nvim. Nvim will shutdown the process
-                             on exit, but if Nvim fails to exit cleanly this
-                             could leave behind orphaned server processes.
-      • {workspace_folders}  (table) List of workspace folders passed to the
-                             language server. For backwards compatibility
-                             rootUri and rootPath will be derived from the
-                             first workspace folder in this list. See
-                             `workspaceFolders` in the LSP spec.
-      • {capabilities}       Map overriding the default capabilities defined
-                             by |vim.lsp.protocol.make_client_capabilities()|,
-                             passed to the language server on initialization.
-                             Hint: use make_client_capabilities() and modify
-                             its result.
-                             • Note: To send an empty dictionary use
-                               `{[vim.type_idx]=vim.types.dictionary}`, else
-                               it will be encoded as an array.
-      • {handlers}           Map of language server method names to
-                             |lsp-handler|
-      • {settings}           Map with language server specific settings. These
-                             are returned to the language server if requested
-                             via `workspace/configuration`. Keys are
-                             case-sensitive.
-      • {commands}           (table) Table that maps string of clientside
-                             commands to user-defined functions. Commands
-                             passed to start_client take precedence over the
-                             global command registry. Each key must be a
-                             unique command name, and the value is a function
-                             which is called if any LSP action (code action,
-                             code lenses, ...) triggers the command.
-      • {init_options}       Values to pass in the initialization request as
-                             `initializationOptions`. See `initialize` in the
-                             LSP spec.
-      • {name}               (string, default=client-id) Name in log messages.
-      • {get_language_id}    function(bufnr, filetype) -> language ID as
-                             string. Defaults to the filetype.
-      • {offset_encoding}    (default="utf-16") One of "utf-8", "utf-16", or
-                             "utf-32" which is the encoding that the LSP
-                             server expects. Client does not verify this is
-                             correct.
-      • {on_error}           Callback with parameters (code, ...), invoked
-                             when the client operation throws an error. `code`
-                             is a number describing the error. Other arguments
-                             may be passed depending on the error kind. See
-                             `vim.lsp.rpc.client_errors` for possible errors.
-                             Use `vim.lsp.rpc.client_errors[code]` to get
-                             human-friendly name.
-      • {before_init}        Callback with parameters (initialize_params,
-                             config) invoked before the LSP "initialize"
-                             phase, where `params` contains the parameters
-                             being sent to the server and `config` is the
-                             config that was passed to
-                             |vim.lsp.start_client()|. You can use this to
-                             modify parameters before they are sent.
-      • {on_init}            Callback (client, initialize_result) invoked
-                             after LSP "initialize", where `result` is a table
-                             of `capabilities` and anything else the server
-                             may send. For example, clangd sends
-                             `initialize_result.offsetEncoding` if
-                             `capabilities.offsetEncoding` was sent to it. You
-                             can only modify the `client.offset_encoding` here
-                             before any notifications are sent. Most language
-                             servers expect to be sent client specified
-                             settings after initialization. Neovim does not
-                             make this assumption. A
-                             `workspace/didChangeConfiguration` notification
-                             should be sent to the server during on_init.
-      • {on_exit}            Callback (code, signal, client_id) invoked on
-                             client exit.
-                             • code: exit code of the process
-                             • signal: number describing the signal used to
-                               terminate (if any)
-                             • client_id: client handle
-      • {on_attach}          Callback (client, bufnr) invoked when client
-                             attaches to a buffer.
-      • {trace}              "off" | "messages" | "verbose" | nil passed
-                             directly to the language server in the initialize
-                             request. Invalid/empty values will default to
-                             "off"
-      • {flags}              A table with flags for the client. The current
-                             (experimental) flags are:
-                             • allow_incremental_sync (bool, default true):
-                               Allow using incremental sync for buffer edits
-                             • debounce_text_changes (number, default 150):
-                               Debounce didChange notifications to the server
-                               by the given number in milliseconds. No
-                               debounce occurs if nil
-                             • exit_timeout (number|boolean, default false):
-                               Milliseconds to wait for server to exit cleanly
-                               after sending the "shutdown" request before
-                               sending kill -15. If set to false, nvim exits
-                               immediately after sending the "shutdown"
-                               request to the server.
-      • {root_dir}           (string) Directory where the LSP server will base
-                             its workspaceFolders, rootUri, and rootPath on
-                             initialization.
+                  • detached: (boolean, default true) Daemonize the server
+                    process so that it runs in a separate process group from
+                    Nvim. Nvim will shutdown the process on exit, but if Nvim
+                    fails to exit cleanly this could leave behind orphaned
+                    server processes.
+                  • workspace_folders: (table) List of workspace folders
+                    passed to the language server. For backwards compatibility
+                    rootUri and rootPath will be derived from the first
+                    workspace folder in this list. See `workspaceFolders` in
+                    the LSP spec.
+                  • capabilities: Map overriding the default capabilities
+                    defined by |vim.lsp.protocol.make_client_capabilities()|,
+                    passed to the language server on initialization. Hint: use
+                    make_client_capabilities() and modify its result.
+                    • Note: To send an empty dictionary use
+                      `{[vim.type_idx]=vim.types.dictionary}`, else it will be
+                      encoded as an array.
+
+                  • handlers: Map of language server method names to
+                    |lsp-handler|
+                  • settings: Map with language server specific settings.
+                    These are returned to the language server if requested via
+                    `workspace/configuration`. Keys are case-sensitive.
+                  • commands: table Table that maps string of clientside
+                    commands to user-defined functions. Commands passed to
+                    start_client take precedence over the global command
+                    registry. Each key must be a unique command name, and the
+                    value is a function which is called if any LSP action
+                    (code action, code lenses, ...) triggers the command.
+                  • init_options Values to pass in the initialization request
+                    as `initializationOptions`. See `initialize` in the LSP
+                    spec.
+                  • name: (string, default=client-id) Name in log messages.
+                  • get_language_id: function(bufnr, filetype) -> language ID
+                    as string. Defaults to the filetype.
+                  • offset_encoding: (default="utf-16") One of "utf-8",
+                    "utf-16", or "utf-32" which is the encoding that the LSP
+                    server expects. Client does not verify this is correct.
+                  • on_error: Callback with parameters (code, ...), invoked
+                    when the client operation throws an error. `code` is a
+                    number describing the error. Other arguments may be passed
+                    depending on the error kind. See
+                    `vim.lsp.rpc.client_errors` for possible errors. Use
+                    `vim.lsp.rpc.client_errors[code]` to get human-friendly
+                    name.
+                  • before_init: Callback with parameters (initialize_params,
+                    config) invoked before the LSP "initialize" phase, where
+                    `params` contains the parameters being sent to the server
+                    and `config` is the config that was passed to
+                    |vim.lsp.start_client()|. You can use this to modify
+                    parameters before they are sent.
+                  • on_init: Callback (client, initialize_result) invoked
+                    after LSP "initialize", where `result` is a table of
+                    `capabilities` and anything else the server may send. For
+                    example, clangd sends `initialize_result.offsetEncoding`
+                    if `capabilities.offsetEncoding` was sent to it. You can
+                    only modify the `client.offset_encoding` here before any
+                    notifications are sent. Most language servers expect to be
+                    sent client specified settings after initialization.
+                    Neovim does not make this assumption. A
+                    `workspace/didChangeConfiguration` notification should be
+                    sent to the server during on_init.
+                  • on_exit Callback (code, signal, client_id) invoked on
+                    client exit.
+                    • code: exit code of the process
+                    • signal: number describing the signal used to terminate
+                      (if any)
+                    • client_id: client handle
+
+                  • on_attach: Callback (client, bufnr) invoked when client
+                    attaches to a buffer.
+                  • trace: ("off" | "messages" | "verbose" | nil) passed
+                    directly to the language server in the initialize request.
+                    Invalid/empty values will default to "off"
+                  • flags: A table with flags for the client. The current
+                    (experimental) flags are:
+                    • allow_incremental_sync (bool, default true): Allow using
+                      incremental sync for buffer edits
+                    • debounce_text_changes (number, default 150): Debounce
+                      didChange notifications to the server by the given
+                      number in milliseconds. No debounce occurs if nil
+                    • exit_timeout (number|boolean, default false):
+                      Milliseconds to wait for server to exit cleanly after
+                      sending the "shutdown" request before sending kill -15.
+                      If set to false, nvim exits immediately after sending
+                      the "shutdown" request to the server.
+
+                  • root_dir: (string) Directory where the LSP server will
+                    base its workspaceFolders, rootUri, and rootPath on
+                    initialization.
 
     Return: ~
         Client id. |vim.lsp.get_client_by_id()| Note: client may not be fully
@@ -974,7 +964,7 @@ stop_client({client_id}, {force})                      *vim.lsp.stop_client()*
     Parameters: ~
       • {client_id}  number|table id or |vim.lsp.client| object, or list
                      thereof
-      • {force}      (boolean) (optional) shutdown forcefully
+      • {force}      (boolean|nil) shutdown forcefully
 
 tagfunc({...})                                             *vim.lsp.tagfunc()*
     Provides an interface between the built-in client and 'tagfunc'.
@@ -1022,6 +1012,8 @@ code_action({options})                             *vim.lsp.buf.code_action()*
                      • only (table|nil): List of LSP `CodeActionKind`s used to
                        filter the code actions. Most language servers support
                        values like `refactor` or `quickfix`.
+                     • triggerKind (number|nil): The reason why code actions
+                       were requested.
 
                    • filter: (function|nil) Predicate taking an `CodeAction`
                      and returning a boolean.
@@ -1036,6 +1028,7 @@ code_action({options})                             *vim.lsp.buf.code_action()*
 
     See also: ~
         https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeAction
+        vim.lsp.protocol.constants.CodeActionTriggerKind
 
 completion({context})                               *vim.lsp.buf.completion()*
     Retrieves the completion items at the current cursor position. Can only be
@@ -1174,7 +1167,7 @@ references({context}, {options})                    *vim.lsp.buf.references()*
     window.
 
     Parameters: ~
-      • {context}  (table) Context for the request
+      • {context}  (table|nil) Context for the request
       • {options}  (table|nil) additional options
                    • on_list: (function) handler for list results. See
                      |lsp-on-list-handler|
@@ -1278,6 +1271,13 @@ on_publish_diagnostics({_}, {result}, {ctx}, {config})
 ==============================================================================
 Lua module: vim.lsp.codelens                                    *lsp-codelens*
 
+clear({client_id}, {bufnr})                         *vim.lsp.codelens.clear()*
+    Clear the lenses
+
+    Parameters: ~
+      • {client_id}  (number|nil) filter by client_id. All clients if nil
+      • {bufnr}      (number|nil) filter by buffer. All buffers if nil
+
 display({lenses}, {bufnr}, {client_id})           *vim.lsp.codelens.display()*
     Display the lenses using virtual text
 
@@ -1332,6 +1332,19 @@ force_refresh({bufnr})               *vim.lsp.semantic_tokens.force_refresh()*
     Parameters: ~
       • {bufnr}  (nil|number) default: current buffer
 
+                                        *vim.lsp.semantic_tokens.get_at_pos()*
+get_at_pos({bufnr}, {row}, {col})
+    Return the semantic token(s) at the given position. If called without
+    arguments, returns the token under the cursor.
+
+    Parameters: ~
+      • {bufnr}  (number|nil) Buffer number (0 for current buffer, default)
+      • {row}    (number|nil) Position row (default cursor position)
+      • {col}    (number|nil) Position column (default cursor position)
+
+    Return: ~
+        (table|nil) List of tokens at position
+
 start({bufnr}, {client_id}, {opts})          *vim.lsp.semantic_tokens.start()*
     Start the semantic token highlighting engine for the given buffer with the
     given client. The client must already be attached to the buffer.
@@ -1340,7 +1353,7 @@ start({bufnr}, {client_id}, {opts})          *vim.lsp.semantic_tokens.start()*
     |vim.lsp.buf_attach_client()|. To opt-out of semantic highlighting with a
     server that supports it, you can delete the semanticTokensProvider table
     from the {server_capabilities} of your client in your |LspAttach| callback
-    or your configuration's `on_attach` callback. >lua
+    or your configuration's `on_attach` callback: >lua
 
        client.server_capabilities.semanticTokensProvider = nil
 <
@@ -1488,8 +1501,8 @@ convert_input_to_markdown_lines({input}, {contents})
 
     Parameters: ~
       • {input}     (`MarkedString` | `MarkedString[]` | `MarkupContent`)
-      • {contents}  (table, optional, default `{}`) List of strings to extend
-                    with converted lines
+      • {contents}  (table|nil) List of strings to extend with converted
+                    lines. Defaults to {}.
 
     Return: ~
         {contents}, extended with lines of converted markdown.
@@ -1546,7 +1559,7 @@ jump_to_location({location}, {offset_encoding}, {reuse_win})
     Parameters: ~
       • {location}         (table) (`Location`|`LocationLink`)
       • {offset_encoding}  "utf-8" | "utf-16" | "utf-32"
-      • {reuse_win}        (boolean) Jump to existing window if buffer is
+      • {reuse_win}        (boolean|nil) Jump to existing window if buffer is
                            already open.
 
     Return: ~
@@ -1592,6 +1605,7 @@ make_floating_popup_options({width}, {height}, {opts})
                   • border (string or table) override `border`
                   • focusable (string or table) override `focusable`
                   • zindex (string or table) override `zindex`, defaults to 50
+                  • relative ("mouse"|"cursor") defaults to "cursor"
 
     Return: ~
         (table) Options
@@ -1637,7 +1651,7 @@ make_position_params({window}, {offset_encoding})
     Parameters: ~
       • {window}           (number|nil) window handle or 0 for current,
                            defaults to current
-      • {offset_encoding}  (string) utf-8|utf-16|utf-32|nil defaults to
+      • {offset_encoding}  (string|nil) utf-8|utf-16|utf-32|nil defaults to
                            `offset_encoding` of first client of buffer of
                            `window`
 
@@ -1768,7 +1782,7 @@ show_document({location}, {offset_encoding}, {opts})
     Parameters: ~
       • {location}         (table) (`Location`|`LocationLink`)
       • {offset_encoding}  "utf-8" | "utf-16" | "utf-32"
-      • {opts}             (table) options
+      • {opts}             (table|nil) options
                            • reuse_win (boolean) Jump to existing window if
                              buffer is already open.
                            • focus (boolean) Whether to focus/jump to location

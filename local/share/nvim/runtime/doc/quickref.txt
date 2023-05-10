@@ -698,7 +698,7 @@ Short explanation of each option:		*option-list*
 'errorformat'	  'efm'     description of the lines in the error file
 'eventignore'	  'ei'	    autocommand events that are ignored
 'expandtab'	  'et'	    use spaces when <Tab> is inserted
-'exrc'		  'ex'	    read .nvimrc and .exrc in the current directory
+'exrc'		  'ex'	    read init files in the current directory
 'fileencoding'	  'fenc'    file encoding for multibyte text
 'fileencodings'   'fencs'   automatically detected character encodings
 'fileformat'	  'ff'	    file format used for file I/O
@@ -821,14 +821,6 @@ Short explanation of each option:		*option-list*
 'previewheight'   'pvh'     height of the preview window
 'previewpopup'    'pvp'     use popup window for preview
 'previewwindow'   'pvw'     identifies the preview window
-'printdevice'	  'pdev'    name of the printer to be used for :hardcopy
-'printencoding'   'penc'    encoding to be used for printing
-'printexpr'	  'pexpr'   expression used to print PostScript for :hardcopy
-'printfont'	  'pfn'     name of the font to be used for :hardcopy
-'printheader'	  'pheader' format of the header used for :hardcopy
-'printmbcharset'  'pmbcs'   CJK character set to be used for :hardcopy
-'printmbfont'	  'pmbfn'   font names to be used for CJK output of :hardcopy
-'printoptions'	  'popt'    controls the format of :hardcopy output
 'pumheight'	  'ph'	    maximum number of items to show in the popup menu
 'pumwidth'	  'pw'	    minimum width of the popup menu
 'pyxversion'	  'pyx'	    Python version used for pyx* commands
@@ -868,7 +860,8 @@ Short explanation of each option:		*option-list*
 'shiftwidth'	  'sw'	    number of spaces to use for (auto)indent step
 'shortmess'	  'shm'     list of flags, reduce length of messages
 'showbreak'	  'sbr'     string to use at the start of wrapped lines
-'showcmd'	  'sc'	    show (partial) command in status line
+'showcmd'	  'sc'	    show (partial) command somewhere
+'showcmdloc'	  'sloc'    where to show (partial) command
 'showfulltag'	  'sft'     show full tag pattern when completing tag
 'showmatch'	  'sm'	    briefly jump to matching bracket if insert one
 'showmode'	  'smd'     message on status line to show current mode
@@ -890,6 +883,7 @@ Short explanation of each option:		*option-list*
 'splitkeep'	  'spk'     determines scroll behavior for split windows
 'splitright'	  'spr'     new window is put right of the current one
 'startofline'	  'sol'     commands move cursor to first non-blank in line
+'statuscolumn'	  'stc'	    custom format for the status column
 'statusline'	  'stl'     custom format for the status line
 'suffixes'	  'su'	    suffixes that are ignored with multiple match
 'suffixesadd'	  'sua'     suffixes added when searching for a file

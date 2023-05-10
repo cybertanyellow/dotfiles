@@ -2,8 +2,8 @@
 " Language: fstab file
 " Maintainer: Radu Dineiu <radu.dineiu@gmail.com>
 " URL: https://raw.github.com/rid9/vim-fstab/master/syntax/fstab.vim
-" Last Change: 2022 Dec 10
-" Version: 1.5
+" Last Change: 2023 Feb 19
+" Version: 1.6.3
 "
 " Credits:
 "   David Necas (Yeti) <yeti@physics.muni.cz>
@@ -56,7 +56,7 @@ syn keyword fsMountPointKeyword contained none swap
 " Type
 syn cluster fsTypeCluster contains=fsTypeKeyword,fsTypeUnknown
 syn match fsTypeUnknown /\s\+\zs\w\+/ contained
-syn keyword fsTypeKeyword contained adfs ados affs anon_inodefs atfs audiofs auto autofs bdev befs bfs btrfs binfmt_misc cd9660 ceph cfs cgroup cifs coda coherent configfs cpuset cramfs debugfs devfs devpts devtmpfs dlmfs e2compr ecryptfs efivarfs efs erofs exfat ext2 ext2fs ext3 ext4 f2fs fdesc ffs filecore fuse fuseblk fusectl gfs2 hfs hfsplus hpfs hugetlbfs iso9660 jffs jffs2 jfs kernfs lfs linprocfs mfs minix mqueue msdos ncpfs nfs nfs4 nfsd nilfs2 none ntfs ntfs3 null nwfs ocfs2 omfs overlay ovlfs pipefs portal proc procfs pstore ptyfs pvfs2 qnx4 qnx6 reiserfs ramfs romfs securityfs shm smbfs spufs squashfs sockfs sshfs std subfs swap sysfs sysv tcfs tmpfs ubifs udf ufs umap umsdos union usbfs userfs v9fs vfat virtiofs vs3fs vxfs wrapfs wvfs xenfs xenix xfs zisofs zonefs
+syn keyword fsTypeKeyword contained adfs ados affs anon_inodefs atfs audiofs auto autofs bdev befs bfs btrfs binfmt_misc cd9660 ceph cfs cgroup cifs coda coherent configfs cpuset cramfs debugfs devfs devpts devtmpfs dlmfs e2compr ecryptfs efivarfs efs erofs exfat ext2 ext2fs ext3 ext4 f2fs fdesc ffs filecore fuse fuseblk fusectl gfs2 hfs hfsplus hpfs hugetlbfs iso9660 jffs jffs2 jfs kernfs lfs linprocfs mfs minix mqueue msdos ncpfs nfs nfs4 nfsd nilfs2 none ntfs ntfs3 null nwfs ocfs2 omfs overlay ovlfs pipefs portal proc procfs pstore ptyfs pvfs2 qnx4 qnx6 reiserfs ramfs romfs rpc_pipefs securityfs shm smbfs spufs squashfs sockfs sshfs std subfs swap sysfs sysv tcfs tmpfs ubifs udf ufs umap umsdos union usbfs userfs v9fs vfat virtiofs vs3fs vxfs wrapfs wvfs xenfs xenix xfs zisofs zonefs
 
 " Options
 " -------
@@ -72,8 +72,12 @@ syn keyword fsOptionsYN y n
 syn keyword fsOptions01 0 1
 syn cluster fsOptionsCheckCluster contains=fsOptionsExt2Check,fsOptionsFatCheck
 syn keyword fsOptionsSize 512 1024 2048
-syn keyword fsOptionsGeneral async atime auto bind current defaults dev devgid devmode devmtime devuid dirsync exec force fstab kudzu loop mand move noatime noauto noclusterr noclusterw nodev nodevmtime nodiratime noexec nomand norelatime nosuid nosymfollow nouser owner rbind rdonly relatime remount ro rq rw suid suiddir supermount sw sync union update user users wxallowed xx nofail failok
+syn keyword fsOptionsGeneral async atime auto bind current defaults dev devgid devmode devmtime devuid dirsync exec force fstab kudzu loop managed mand move noatime noauto noclusterr noclusterw nodev nodevmtime nodiratime noexec nomand norelatime nosuid nosymfollow nouser owner pamconsole rbind rdonly relatime remount ro rq rw suid suiddir supermount sw sync union update user users wxallowed xx nofail failok lazytime
 syn match fsOptionsGeneral /_netdev/
+
+syn match fsOptionsKeywords contained /\<x-systemd\.\%(requires\|before\|after\|wanted-by\|required-by\|requires-mounts-for\|idle-timeout\|device-timeout\|mount-timeout\)=/ nextgroup=fsOptionsString
+syn match fsOptionsKeywords contained /\<x-systemd\.\%(device-bound\|automount\|makefs\|growfs\|rw-only\)/
+syn match fsOptionsKeywords contained /\<x-initrd\.mount/
 
 syn match fsOptionsKeywords contained /\<cache=/ nextgroup=fsOptionsCache
 syn keyword fsOptionsCache yes no none strict loose fscache mmap
@@ -385,7 +389,7 @@ syn match fsFreqPassNumber /\d\+\s\+[012]\s*/ contained
 syn match fsDevice /^\s*\zs.\{-1,}\s/me=e-1 nextgroup=fsMountPoint contains=@fsDeviceCluster,@fsGeneralCluster
 syn match fsMountPoint /\s\+.\{-}\s/me=e-1 nextgroup=fsType contains=@fsMountPointCluster,@fsGeneralCluster contained
 syn match fsType /\s\+.\{-}\s/me=e-1 nextgroup=fsOptions contains=@fsTypeCluster,@fsGeneralCluster contained
-syn match fsOptions /\s\+.\{-}\s/me=e-1 nextgroup=fsFreqPass contains=@fsOptionsCluster,@fsGeneralCluster contained
+syn match fsOptions /\s\+.\{-}\%(\s\|$\)/ nextgroup=fsFreqPass contains=@fsOptionsCluster,@fsGeneralCluster contained
 syn match fsFreqPass /\s\+.\{-}$/ contains=@fsFreqPassCluster,@fsGeneralCluster contained
 
 " Whole line comments
@@ -487,4 +491,4 @@ let b:current_syntax = "fstab"
 let &cpo = s:cpo_save
 unlet s:cpo_save
 
-" vim: ts=8 ft=vim
+" vim: ts=8 noet ft=vim

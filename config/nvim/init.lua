@@ -144,10 +144,10 @@ local function on_attach(client, buffer)
     vim.keymap.set("n", "gD", vim.lsp.buf.implementation, keymap_opts)
     -- conflict with tmux-navigate. vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
     vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, keymap_opts)
-    vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
+    -- vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
     vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, keymap_opts)
     vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, keymap_opts)
-    vim.keymap.set("n", "gd", vim.lsp.buf.definition, keymap_opts)
+    -- vim.keymap.set("n", "gd", vim.lsp.buf.definition, keymap_opts)
     vim.keymap.set("n", "ga", vim.lsp.buf.code_action, keymap_opts)
 
     -- Show diagnostic popup on cursor hover
@@ -269,6 +269,7 @@ vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
 vim.keymap.set('n', 'vv', "<C-w>v", {})
 
 require('nvim-tmux-navigation').setup {

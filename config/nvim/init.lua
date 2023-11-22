@@ -1,118 +1,18 @@
--- This is an example on how rust-analyzer can be configured using rust-tools
---
--- Prerequisites:
--- - neovim >= 0.8
--- - rust-analyzer: https://rust-analyzer.github.io/manual.html#rust-analyzer-language-server-binary
-
-local ensure_packer = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
-    vim.cmd([[packadd packer.nvim]])
-    return true
-  end
-  return false
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
 end
+vim.opt.rtp:prepend(lazypath)
 
-local packer_bootstrap = ensure_packer()
+require("lazy").setup("plugins")
 
-require("packer").init({
-  autoremove = true,
-})
-require("packer").startup(function(use)
-  -- Packer can manage itself
-  use("wbthomason/packer.nvim")
-  -- Collection of common configurations for the Nvim LSP client
-  use("neovim/nvim-lspconfig")
-  -- Visualize lsp progress
-  use({
-    "j-hui/fidget.nvim",
-    config = function()
-      require("fidget").setup()
-    end
-  })
-
-  -- Autocompletion framework
-  use("hrsh7th/nvim-cmp")
-  use({
-    -- cmp LSP completion
-    "hrsh7th/cmp-nvim-lsp",
-    -- cmp Snippet completion
-    "hrsh7th/cmp-vsnip",
-    -- cmp Path completion
-    "hrsh7th/cmp-path",
-    "hrsh7th/cmp-buffer",
-    after = { "hrsh7th/nvim-cmp" },
-    requires = { "hrsh7th/nvim-cmp" },
-  })
-  -- See hrsh7th other plugins for more great completion sources!
-  -- Snippet engine
-  use('hrsh7th/vim-vsnip')
-  -- Adds extra functionality over rust analyzer
-  use("simrat39/rust-tools.nvim")
-
-  -- Optional
-  use("nvim-lua/popup.nvim")
-  use("nvim-lua/plenary.nvim")
-  use("nvim-telescope/telescope.nvim")
-  use({
-     "nvim-telescope/telescope-fzf-native.nvim",
-     run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && \
-     	cmake --build build --config Release && \
-	cmake --install build --prefix build'
-  })
-
-  use("nvim-treesitter/nvim-treesitter")
-  use("tpope/vim-fugitive")
-
-  -- Some color scheme other then default
-  use("arcticicestudio/nord-vim")
-  use("NLKNguyen/papercolor-theme")
-  -- use({"itchyny/lightline.vim", colorscheme = 'PaperColor'})
-  use("folke/tokyonight.nvim")
-  use('olimorris/onedarkpro.nvim')
-  use('sainnhe/everforest')
-  use('rebelot/kanagawa.nvim')
-  use('sainnhe/gruvbox-material')
-  use('marko-cerovac/material.nvim')
-  use({'nvim-lualine/lualine.nvim',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
-  })
-
---  use { 'alexghergh/nvim-tmux-navigation', config = function()
---	  require'nvim-tmux-navigation'.setup {
---		  disable_when_zoomed = true, -- defaults to false
---		  keybindings = {
---			  left = "<C-h>",
---			  down = "<C-j>",
---			  up = "<C-k>",
---			  right = "<C-l>",
---			  last_active = "<C-\\>",
---			  next = "<C-Space>",
---		  }
---	  }
---	  end }
-  use('alexghergh/nvim-tmux-navigation')
-  use('vivien/vim-linux-coding-style')
-  use('Vimjas/vim-python-pep8-indent')
-end)
-
--- the first run will install packer and our plugins
-if packer_bootstrap then
-  require("packer").sync()
-  return
-end
-
-vim.o.termguicolors = true
-
--- vim.cmd([[ colorscheme PaperColor ]])
--- vim.cmd[[colorscheme tokyonight-night]]
--- vim.cmd[[colorscheme onedark]]
--- vim.cmd[[colorscheme everforest]]
---vim.cmd[[colorscheme kanagawa]]
---vim.g.material_style = "deep ocean"
---vim.cmd[[colorscheme material]]
 vim.cmd("colorscheme kanagawa")
 
 require("lualine").setup({
@@ -123,8 +23,6 @@ require("lualine").setup({
   { theme = 'kanagawa' },
   --{ theme = 'material' },
 })
-
-
 
 -- Set completeopt to have a better completion experience
 -- :help completeopt
@@ -144,10 +42,8 @@ local function on_attach(client, buffer)
     vim.keymap.set("n", "gD", vim.lsp.buf.implementation, keymap_opts)
     -- conflict with tmux-navigate. vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
     vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, keymap_opts)
-    vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
     vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, keymap_opts)
     vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, keymap_opts)
-    vim.keymap.set("n", "gd", vim.lsp.buf.definition, keymap_opts)
     vim.keymap.set("n", "ga", vim.lsp.buf.code_action, keymap_opts)
 
     -- Show diagnostic popup on cursor hover
@@ -203,7 +99,6 @@ require("rust-tools").setup(opts)
 require("lspconfig").clangd.setup{
 	on_attach = on_attach,
 }
--- require("lspconfig").pylyzer.setup{}
 
 -- Setup Completion
 -- See https://github.com/hrsh7th/nvim-cmp#basic-configuration
@@ -261,14 +156,13 @@ require('telescope').setup {
     }
   }
 }
--- To get fzf loaded and working with telescope, you need to call
--- load_extension, somewhere after setup function:
 require('telescope').load_extension('fzf')
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+vim.keymap.set('n', '<leader>fr', builtin.lsp_references, { noremap = true, silent = true})
 vim.keymap.set('n', 'vv', "<C-w>v", {})
 
 require('nvim-tmux-navigation').setup {

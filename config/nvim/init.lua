@@ -1,149 +1,19 @@
--- This is an example on how rust-analyzer can be configured using rust-tools
---
--- Prerequisites:
--- - neovim >= 0.8
--- - rust-analyzer: https://rust-analyzer.github.io/manual.html#rust-analyzer-language-server-binary
-
-local ensure_packer = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
-    vim.cmd([[packadd packer.nvim]])
-    return true
-  end
-  return false
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
 end
+vim.opt.rtp:prepend(lazypath)
 
-local packer_bootstrap = ensure_packer()
+require("lazy").setup("plugins")
 
-require("packer").init({
-  autoremove = true,
-})
-require("packer").startup(function(use)
-  -- Packer can manage itself
-  use("wbthomason/packer.nvim")
-  -- Collection of common configurations for the Nvim LSP client
-  use("neovim/nvim-lspconfig")
-  -- Visualize lsp progress
-  use({
-    "j-hui/fidget.nvim", tag = 'legacy',
-    config = function()
-      require("fidget").setup()
-    end
-  })
-
-  -- Autocompletion framework
-  use("hrsh7th/nvim-cmp")
-  use({
-    -- cmp LSP completion
-    "hrsh7th/cmp-nvim-lsp",
-    -- cmp Snippet completion
-    "hrsh7th/cmp-vsnip",
-    -- cmp Path completion
-    "hrsh7th/cmp-path",
-    "hrsh7th/cmp-buffer",
-    after = { "hrsh7th/nvim-cmp" },
-    requires = { "hrsh7th/nvim-cmp" },
-  })
-  -- See hrsh7th other plugins for more great completion sources!
-  -- Snippet engine
-  use('hrsh7th/vim-vsnip')
-  -- Adds extra functionality over rust analyzer
-  use("simrat39/rust-tools.nvim")
-
-  -- Optional
-  use("nvim-lua/popup.nvim")
-  use("nvim-lua/plenary.nvim")
-  use("nvim-telescope/telescope.nvim")
-  use({
-     "nvim-telescope/telescope-fzf-native.nvim",
-     run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && \
-     	cmake --build build --config Release && \
-	cmake --install build --prefix build'
-  })
-
-  use("nvim-treesitter/nvim-treesitter")
-  use("tpope/vim-fugitive")
-
-  -- Some color scheme other then default
-  use("arcticicestudio/nord-vim")
-  use("NLKNguyen/papercolor-theme")
-  -- use({"itchyny/lightline.vim", colorscheme = 'PaperColor'})
-  use("folke/tokyonight.nvim")
-  use('olimorris/onedarkpro.nvim')
-  use('sainnhe/everforest')
-  use('rebelot/kanagawa.nvim')
-  use('sainnhe/gruvbox-material')
-  use('marko-cerovac/material.nvim')
-  use({'nvim-lualine/lualine.nvim',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true },
-  })
-  use("oxfist/night-owl.nvim")
-
---  use { 'alexghergh/nvim-tmux-navigation', config = function()
---	  require'nvim-tmux-navigation'.setup {
---		  disable_when_zoomed = true, -- defaults to false
---		  keybindings = {
---			  left = "<C-h>",
---			  down = "<C-j>",
---			  up = "<C-k>",
---			  right = "<C-l>",
---			  last_active = "<C-\\>",
---			  next = "<C-Space>",
---		  }
---	  }
---	  end }
-  use('alexghergh/nvim-tmux-navigation')
-  use('lewis6991/gitsigns.nvim')
-
-  --use('vivien/vim-linux-coding-style')
-  use('Vimjas/vim-python-pep8-indent')
-  -- using packer.nvim
-  --use {
-  --  'nmac427/guess-indent.nvim',
-  --  config = function() require('guess-indent').setup {} end,
-  --}
-  use({'lukas-reineke/indent-blankline.nvim', tag = 'v2.20.8'})
-   
---  use { "anuvyklack/windows.nvim",
---	  requires = {
---		  "anuvyklack/middleclass",
---		  "anuvyklack/animation.nvim"
---	  },
---	  config = function()
---		  vim.o.winwidth = 10
---		  vim.o.winminwidth = 10
---		  vim.o.equalalways = false
---		  require('windows').setup()
---	  end
---  }
---  use {
---	  'nvim-focus/focus.nvim',
---	  config = function() require("focus").setup() end
---  }
---  use {
---	  "luukvbaal/nnn.nvim",
---	  config = function() require("nnn").setup() end
---  }
-end)
-
--- the first run will install packer and our plugins
-if packer_bootstrap then
-  require("packer").sync()
-  return
-end
-
-vim.o.termguicolors = true
-
--- vim.cmd([[ colorscheme PaperColor ]])
--- vim.cmd[[colorscheme tokyonight-night]]
--- vim.cmd[[colorscheme onedark]]
--- vim.cmd[[colorscheme everforest]]
---vim.g.material_style = "deep ocean"
---vim.cmd[[colorscheme material]]
 vim.cmd("colorscheme kanagawa")
---vim.cmd("colorscheme night-owl")
 
 require("lualine").setup({
   --{ theme = 'PaperColor' },
@@ -152,50 +22,7 @@ require("lualine").setup({
   -- { theme = 'everforest' },
   { theme = 'kanagawa' },
   --{ theme = 'material' },
-  --{ themem = 'night-owl' },
 })
-
-require('gitsigns').setup()
-
-vim.opt.termguicolors = true
-vim.cmd [[highlight IndentBlanklineIndent1 guibg=#1f1f1f gui=nocombine]]
-vim.cmd [[highlight IndentBlanklineIndent2 guibg=#1a1a1a gui=nocombine]]
-
-require("indent_blankline").setup {
-    char = "",
-    char_highlight_list = {
-        "IndentBlanklineIndent1",
-        "IndentBlanklineIndent2",
-    },
-    space_char_highlight_list = {
-        "IndentBlanklineIndent1",
-        "IndentBlanklineIndent2",
-    },
-    show_trailing_blankline_indent = false,
-
---	indent = { highlight = highlight, char = "" },
---	whitespace = {
---		highlight = highlight,
---		remove_blankline_trail = false,
---	},
---	scope = { enabled = false },
-}
-
---vim.opt.list = true
---vim.opt.listchars:append "space:"
---vim.opt.listchars:append "eol:"
-
-require("indent_blankline").setup {
-    space_char_blankline = " ",
-    char_highlight_list = {
-        "IndentBlanklineIndent1",
-        "IndentBlanklineIndent2",
-        "IndentBlanklineIndent3",
-        "IndentBlanklineIndent4",
-        "IndentBlanklineIndent5",
-        "IndentBlanklineIndent6",
-    },
-}
 
 -- Set completeopt to have a better completion experience
 -- :help completeopt
@@ -215,10 +42,8 @@ local function on_attach(client, buffer)
     vim.keymap.set("n", "gD", vim.lsp.buf.implementation, keymap_opts)
     -- conflict with tmux-navigate. vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
     vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, keymap_opts)
-    -- vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
     vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, keymap_opts)
     vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, keymap_opts)
-    -- vim.keymap.set("n", "gd", vim.lsp.buf.definition, keymap_opts)
     vim.keymap.set("n", "ga", vim.lsp.buf.code_action, keymap_opts)
 
     -- Show diagnostic popup on cursor hover
@@ -274,7 +99,6 @@ require("rust-tools").setup(opts)
 require("lspconfig").clangd.setup{
 	on_attach = on_attach,
 }
--- require("lspconfig").pylyzer.setup{}
 
 -- Setup Completion
 -- See https://github.com/hrsh7th/nvim-cmp#basic-configuration
@@ -332,15 +156,13 @@ require('telescope').setup {
     }
   }
 }
--- To get fzf loaded and working with telescope, you need to call
--- load_extension, somewhere after setup function:
 require('telescope').load_extension('fzf')
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
-vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
+vim.keymap.set('n', '<leader>fr', builtin.lsp_references, { noremap = true, silent = true})
 vim.keymap.set('n', 'vv', "<C-w>v", {})
 
 require('nvim-tmux-navigation').setup {
@@ -355,8 +177,40 @@ require('nvim-tmux-navigation').setup {
 	}
 }
 
+require('gitsigns').setup()
+require('fidget').setup()
+
+vim.opt.termguicolors = true
+vim.cmd [[highlight IndentBlanklineIndent1 guibg=#1f1f1f gui=nocombine]]
+vim.cmd [[highlight IndentBlanklineIndent2 guibg=#1a1a1a gui=nocombine]]
+
+require("indent_blankline").setup {
+    char = "",
+    char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+    },
+    space_char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+    },
+    show_trailing_blankline_indent = false,
+}
+
+require("indent_blankline").setup {
+    space_char_blankline = " ",
+    char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+        "IndentBlanklineIndent3",
+        "IndentBlanklineIndent4",
+        "IndentBlanklineIndent5",
+        "IndentBlanklineIndent6",
+    },
+}
+
 local function cmd(command)
-	return table.concat({ '<Cmd>', command, '<CR>' })
+        return table.concat({ '<Cmd>', command, '<CR>' })
 end
 
 vim.keymap.set('n', '<C-w>z', cmd 'WindowsMaximize')

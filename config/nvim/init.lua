@@ -27,7 +27,7 @@ require("packer").startup(function(use)
   use("neovim/nvim-lspconfig")
   -- Visualize lsp progress
   use({
-    "j-hui/fidget.nvim",
+    "j-hui/fidget.nvim", tag = 'legacy',
     config = function()
       require("fidget").setup()
     end
@@ -79,6 +79,7 @@ require("packer").startup(function(use)
   use({'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true },
   })
+  use("oxfist/night-owl.nvim")
 
 --  use { 'alexghergh/nvim-tmux-navigation', config = function()
 --	  require'nvim-tmux-navigation'.setup {
@@ -94,8 +95,37 @@ require("packer").startup(function(use)
 --	  }
 --	  end }
   use('alexghergh/nvim-tmux-navigation')
-  use('vivien/vim-linux-coding-style')
+  use('lewis6991/gitsigns.nvim')
+
+  --use('vivien/vim-linux-coding-style')
   use('Vimjas/vim-python-pep8-indent')
+  -- using packer.nvim
+  --use {
+  --  'nmac427/guess-indent.nvim',
+  --  config = function() require('guess-indent').setup {} end,
+  --}
+  use({'lukas-reineke/indent-blankline.nvim', tag = 'v2.20.8'})
+   
+--  use { "anuvyklack/windows.nvim",
+--	  requires = {
+--		  "anuvyklack/middleclass",
+--		  "anuvyklack/animation.nvim"
+--	  },
+--	  config = function()
+--		  vim.o.winwidth = 10
+--		  vim.o.winminwidth = 10
+--		  vim.o.equalalways = false
+--		  require('windows').setup()
+--	  end
+--  }
+--  use {
+--	  'nvim-focus/focus.nvim',
+--	  config = function() require("focus").setup() end
+--  }
+--  use {
+--	  "luukvbaal/nnn.nvim",
+--	  config = function() require("nnn").setup() end
+--  }
 end)
 
 -- the first run will install packer and our plugins
@@ -110,10 +140,10 @@ vim.o.termguicolors = true
 -- vim.cmd[[colorscheme tokyonight-night]]
 -- vim.cmd[[colorscheme onedark]]
 -- vim.cmd[[colorscheme everforest]]
---vim.cmd[[colorscheme kanagawa]]
 --vim.g.material_style = "deep ocean"
 --vim.cmd[[colorscheme material]]
 vim.cmd("colorscheme kanagawa")
+--vim.cmd("colorscheme night-owl")
 
 require("lualine").setup({
   --{ theme = 'PaperColor' },
@@ -122,9 +152,50 @@ require("lualine").setup({
   -- { theme = 'everforest' },
   { theme = 'kanagawa' },
   --{ theme = 'material' },
+  --{ themem = 'night-owl' },
 })
 
+require('gitsigns').setup()
 
+vim.opt.termguicolors = true
+vim.cmd [[highlight IndentBlanklineIndent1 guibg=#1f1f1f gui=nocombine]]
+vim.cmd [[highlight IndentBlanklineIndent2 guibg=#1a1a1a gui=nocombine]]
+
+require("indent_blankline").setup {
+    char = "",
+    char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+    },
+    space_char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+    },
+    show_trailing_blankline_indent = false,
+
+--	indent = { highlight = highlight, char = "" },
+--	whitespace = {
+--		highlight = highlight,
+--		remove_blankline_trail = false,
+--	},
+--	scope = { enabled = false },
+}
+
+--vim.opt.list = true
+--vim.opt.listchars:append "space:"
+--vim.opt.listchars:append "eol:"
+
+require("indent_blankline").setup {
+    space_char_blankline = " ",
+    char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+        "IndentBlanklineIndent3",
+        "IndentBlanklineIndent4",
+        "IndentBlanklineIndent5",
+        "IndentBlanklineIndent6",
+    },
+}
 
 -- Set completeopt to have a better completion experience
 -- :help completeopt
@@ -283,3 +354,17 @@ require('nvim-tmux-navigation').setup {
 		next = "<C-Space>",
 	}
 }
+
+local function cmd(command)
+	return table.concat({ '<Cmd>', command, '<CR>' })
+end
+
+vim.keymap.set('n', '<C-w>z', cmd 'WindowsMaximize')
+vim.keymap.set('n', '<C-w>_', cmd 'WindowsMaximizeVertically')
+vim.keymap.set('n', '<C-w>|', cmd 'WindowsMaximizeHorizontally')
+vim.keymap.set('n', '<C-w>=', cmd 'WindowsEqualize')
+
+if vim.g.neovide then
+    -- Put anything you want to happen only in Neovide here
+    vim.o.guifont = "Source Code Pro:h10"
+end

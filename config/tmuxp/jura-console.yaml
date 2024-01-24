@@ -1,0 +1,27 @@
+session_name: jura-console
+start_directory: "~/work"
+windows:
+  - window_name: np/ap
+    layout: main-horizontal
+    options:
+      main-pane-height: 50
+    panes:
+      - shell_command:
+          - minicom -m8 -D /dev/ttyUSB1
+        focus: true
+      - shell_command:
+          - minicom -m8 -D /dev/ttyUSB2
+      - shell_command:
+          - minicom -m8 -D /dev/ttyUSB3
+      - shell_command:
+          - minicom -m8 -D /dev/ttyUSB4
+      - shell_command:
+          - minicom -m8 -D /dev/ttyUSB5
+  - window_name: build
+  - window_name: work
+  - window_name: source
+  - window_name: source
+  - window_name: top
+    panes:
+      - shell_command:
+        - top

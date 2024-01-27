@@ -1,0 +1,40 @@
+session_name: cobra
+start_directory: "~/cobra"
+windows:
+  - window_name: build
+    layout: main-vertical
+    options:
+      main-pane-width: 60%
+    shell_command_before: docker run -d --rm -v /dev/shm:/dev/shm -e USER=yellow -e PASSWORD=12345 -p 6080:80 -p 2222:22 -v /home/yellow/cobra:/cobra cybertanyellow/andesight-ubuntu-vnc:520
+    panes:
+      - shell_command:
+          - ssh yellow@127.0.0.1 -p 2222
+        focus: true
+      - shell_command:
+          - ls
+  - window_name: m1
+  - window_name: m2
+  - window_name: m3
+  - window_name: m4
+  - window_name: yocto1
+    layout: main-vertical
+    options:
+      main-pane-width: 60%
+    panes:
+      - shell_command:
+          - docker run --rm -it --add-host=bitbucket.org:192.168.2.231 -v /home/yellow/cobra:/home/metanoia/cobra -v /home/yellow/work/yocto-downloads:/home/metanoia/cobra/downloads cobra-build-yocto:4 bash
+        focus: true
+      - shell_command:
+          - ls
+  - window_name: yocto2
+  - window_name: yocto3
+  - window_name: fpga1
+    layout: main-vertical
+    options:
+      main-pane-width: 50%
+    panes:
+      - ssh yellow@127.0.0.1 -p 2222
+      - ssh fpga1
+      - ssh fpga1
+    #options_after:
+      #synchronize-panes: on

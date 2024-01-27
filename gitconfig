@@ -1,0 +1,31 @@
+[credential]
+	helper = true
+[user]
+	email = yellow.huang@metanoia-comm.com
+	name = Yellow Huang
+[core]
+	editor = nvim
+	pager = delta
+[color]
+	ui = auto
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true    # use n and N to move between diff sections
+	light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+	#syntax-theme = Dracula
+	plus-style = bold syntax "#003500"
+[merge]
+	conflictstyle = diff3
+[diff]
+	colorMoved = default
+[alias]
+	tree1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
+	tree2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)'
+	tree3 = log --graph --decorate --abbrev-commit --all  --pretty=oneline
+	tree = tree1

@@ -17,7 +17,7 @@
 # Use custom format
 format = '''
 [┌─────────────────────────────────────────](bold green)
-[│](bold green)$directory$rust$package$git_branch
+[│](bold green)$time$directory$rust$package$git_branch
 [└─>](bold green) '''
 
 # Wait 10 milliseconds for starship to check files under the current directory.
@@ -35,3 +35,10 @@ palette = 'foo'
 blue = '21'
 # Define new color
 mustard = '#af8700'
+
+[git_status]
+disabled = true
+
+[time]
+disabled = true
+format = '[\[$time\]]($style) '

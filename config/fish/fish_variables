@@ -1,5 +1,6 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
+SETUVAR --export JIRA_API_TOKEN:ATATT3xFfGF07VG9o_W9bAGxyHo9cUWV7YBQH\x2dgUNinRsSgem_BNAMgn1w3534mLOQ6FkRvHRbeOoP8e1Tbtstw43a4gDDfSIKNmt3SpnObkGatIOI6BI8C1_idUXrtvDOQqQ_timJr6HFoog7kHgqVuup7vYw09jCnXSc_6\x2duJ6kP54bp830dM\x3dED842D2E
 SETUVAR --export STARSHIP_SHELL:fish
 SETUVAR VIRTUAL_ENV_DISABLE_PROMPT:1
 SETUVAR __fish_initialized:3400
@@ -25,7 +26,7 @@ SETUVAR fish_color_operator:00a6b2
 SETUVAR fish_color_param:00afff
 SETUVAR fish_color_quote:999900
 SETUVAR fish_color_redirection:00afff
-SETUVAR fish_color_search_match:bryellow\x1e\x2d\x2dbackground\x3dbrblack
+SETUVAR fish_color_search_match:white\x1e\x2d\x2dbackground\x3dbrblack
 SETUVAR fish_color_selection:white\x1e\x2d\x2dbold\x1e\x2d\x2dbackground\x3dbrblack
 SETUVAR fish_color_status:red
 SETUVAR fish_color_user:brgreen
@@ -37,6 +38,6 @@ SETUVAR fish_pager_color_description:B3A06D\x1eyellow
 SETUVAR fish_pager_color_prefix:white\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
 SETUVAR fish_pager_color_progress:brwhite\x1e\x2d\x2dbackground\x3dcyan
 SETUVAR fish_pager_color_selected_background:\x2dr
-SETUVAR fish_user_paths:/home/yellow/\x2ecargo/bin/\x1e/home/yellow/\x2elocal/bin\x1e/home/yellow/\x2evim/plugged/fzf/bin
+SETUVAR fish_user_paths:/home/yellow/\x2ecargo/bin/\x1e/home/yellow/\x2elocal/bin\x1e/home/yellow/\x2evim/plugged/fzf/bin\x1e/home/yellow/\x2erye/shims
 SETUVAR nvm_data:/home/yellow/\x2elocal/share/nvm
 SETUVAR nvm_mirror:https\x3a//nodejs\x2eorg/dist

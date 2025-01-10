@@ -4,6 +4,8 @@
 #
 # Read `man 5 sway` for a complete reference.
 
+include catppuccin-mocha
+
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
@@ -195,12 +197,23 @@ mode "resize" {
 }
 bindsym $mod+r mode "resize"
 
+# target                 title     bg    text   indicator  border
+client.focused           $lavender $base $text  $rosewater $lavender
+client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
+client.unfocused         $overlay0 $base $text  $rosewater $overlay0
+client.urgent            $peach    $base $peach $overlay0  $peach
+client.placeholder       $overlay0 $base $text  $overlay0  $overlay0
+client.background        $base
+
 #
 # Status Bar:
 #
 # Read `man 5 sway-bar` for more information about this section.
 bar {
     position top
+
+    mode hide
+    hidden_state show
 
     # When the status_command prints a new line to stdout, swaybar updates.
     # The default just shows the current date and time.
@@ -214,6 +227,18 @@ bar {
     #    inactive_workspace #32323200 #32323200 #5c5c5c
     #}
     #[yellow end]
+    colors {
+	    background         $base
+		    statusline         $text
+		    focused_statusline $text
+		    focused_separator  $base
+
+		    # target           border bg        text
+		    focused_workspace  $base  $mauve    $crust
+		    active_workspace   $base  $surface2 $text
+		    inactive_workspace $base  $base     $text
+		    urgent_workspace   $base  $red      $crust
+    }
 }
 
 # [yellow]
